@@ -91,14 +91,27 @@ Reload
 Return
 
 ^!v:: 
-Send %Clipboard%
+SendEvent {Raw}  %Clipboard%
 Return
 
-^!b::
+ 
+CapsLock & v::
+
+if (InStr(Clipboard, "document.query")){
+SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
+SendStr := StrReplace(SendStr, """""", """",,-1)
+SendEvent {Raw} %SendStr%    
+} Else {
 SendStr := StrReplace(Clipboard, """", """""")
-SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('|""([^\(]+)'|""\)", "$1")
-Send "%SendStr%"
+SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
+SendEvent {Raw} "%SendStr%"
+}
+
 Return
+
+
+
+
 
 ^!WheelUp::Send {Volume_Up 3}
 ^!WheelDown::Send {Volume_Down 3}
