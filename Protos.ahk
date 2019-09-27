@@ -15,7 +15,7 @@ getCursorWindow(){
      If (InStr(pName, "explorer") or pName = "")	
      Return -1
      Else
-     Return WinUMID
+     Return WinUMID 
 }
 
 #Include %A_ScriptDir%\toggler.ahk
@@ -100,9 +100,9 @@ SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('|""([^\(]+)'
 Send "%SendStr%"
 Return
 
-^WheelUp::Send {Volume_Up 3}
-^WheelDown::Send {Volume_Down 3}
-^MButton::Volume_Mute
+^!WheelUp::Send {Volume_Up 3}
+^!WheelDown::Send {Volume_Down 3}
+^!MButton::Volume_Mute
 XButton1:: Return
 XButton2:: Return
 ^XButton1:: Send #^{Right}
