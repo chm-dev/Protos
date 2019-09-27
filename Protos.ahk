@@ -92,25 +92,23 @@ Return
 
 ^!v:: 
 SendEvent {Raw}  %Clipboard%
-Return
+Return 
 
- 
+
 CapsLock & v::
+if (InStr(Clipboard, "document.query") = 0){
 
-if (InStr(Clipboard, "document.query")){
 SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
 SendStr := StrReplace(SendStr, """""", """",,-1)
-SendEvent {Raw} %SendStr%    
+;MsgBox, %Clipboard%, %SendStr%
+SendEvent {Raw} document.querySelector("%SendStr%")
 } Else {
 SendStr := StrReplace(Clipboard, """", """""")
 SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
-SendEvent {Raw} "%SendStr%"
+
+SendEvent "%SendStr%"
 }
-
 Return
-
-
-
 
 
 ^!WheelUp::Send {Volume_Up 3}
