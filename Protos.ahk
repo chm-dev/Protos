@@ -101,7 +101,7 @@ if (InStr(Clipboard, "document.query") = 0){
 SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
 SendStr := StrReplace(SendStr, """""", """",,-1)
 ;MsgBox, %Clipboard%, %SendStr%
-SendEvent {Raw} document.querySelector("%SendStr%")
+SendEvent {Raw} document.querySelector('%SendStr%')
 } Else {
 SendStr := StrReplace(Clipboard, """", """""")
 SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
