@@ -139,7 +139,13 @@ Return
 SendInput [sessionId]
 Return
 
+::rcv:: 
+SendInput \rcon callvote 
+Return
 
+::cq3::
+SendInput \connect q3.click
+Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
 CapsLock & z:: Run, "C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\chrome_proxy.exe" --profile-directory=Default --app-id=cgfennglocinhjpfenpaoimnocjogpdh
