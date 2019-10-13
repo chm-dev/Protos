@@ -1,5 +1,5 @@
-﻿#SingleInstance Force
-#Persistent
+﻿;#SingleInstance Force
+;#Persistent
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 global ClipSaved
@@ -22,7 +22,7 @@ getCursorWindow(){
 #Include %A_ScriptDir%\dimmer.ahk
 
 
-CapsLock:: Return 
+
 
 CapsLock & LButton:: 
 WinUMID := getCursorWindow()
@@ -148,7 +148,6 @@ SendInput \connect q3.click
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
-CapsLock & z:: Run, "C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\chrome_proxy.exe" --profile-directory=Default --app-id=cgfennglocinhjpfenpaoimnocjogpdh
 
 ;-Caption
 ScrollLock & LButton::

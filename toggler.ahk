@@ -1,21 +1,80 @@
-#SingleInstance Force
-#Persistent
 
+/*
+CapsLock::
+SetTimer, showToggles, -500
+showToggles:
+if (GetKeyState("CapsLock","L")){
+OutputDebug, caps 500
+WinGet, currentActive, ID, A
+;Gui toggles:+LastFoundExist
+;If (WinExist()) {
+     Gui, toggles:Show, w%w% h%h% x0 y0 
+     WinActivate, ahk_id %currentActive%
+KeyWait, %A_ThisHotkey%
+
+}
+
+
+Return
+
+ScrollLock::Gui, toggles:Show, w%w% h%h% x0 y0 
+
+
+*CapsLock Up::
+SetTimer, showToggles, Off
+Gui, toggles:+LastFoundExist
+if (WinExist()){
+
+if not DllCall("IsWindowVisible", "UInt", WinExist("AutoHotkey Help")) ; WinExist() returns an HWND.
+MsgBox The window is not visible.
+
+
+Gui, toggles:Hide
+
+}
+Return
+*/
+#InstallKeybdHook
+#include Lib\TapHoldManager.ahk
+
+SetCapsLockState, AlwaysOff
 default_modifier = CapsLock
 set_modifier = LAlt
 remove_modifier = LControl 
 
-allowedKeys = 1,2,3,4,5,6,7,8,9,0,F1,F2,F3,F4,F5
+allowedKeys = ``,1,2,3,4,5,6,7,8,9,0,F1,F2,F3,F4,F5
 allowedKeysArr := StrSplit(allowedKeys,",") 
+;GUI
 
-global iconMargin := 10
+global windows := {}
+area :=,  old_area :=
+w := A_ScreenWidth, h := 30
+x := 0,y := 0
+
+thm := new TapHoldManager(,,,"~")
+thm.Add("CapsLock", Func("ShowCurrentToggles"))
+
+
+createWindow(h)
+
+
+; Function declarations below
+
+EncodeInteger( p_value, p_size, p_address, p_offset )
+{
+     loop, %p_size%
+          DllCall( "RtlFillMemory"
+     , "uint", p_address+p_offset+A_Index-1
+     , "uint", 1
+     , "uchar", ( p_value >> ( 8*( A_Index-1 ) ) ) & 0xFF )
+}
 
 ButtonRegister(modifier, hkey) {
-     
      local fn
      fn := Func("HotkeyShouldFire").Bind(modifier)
      Hotkey If, % fn
      Hotkey % hkey, FireHotkey
+     
 }
 
 HotkeyShouldFire(modifier, thisHotkey) {
@@ -26,6 +85,7 @@ FireHotkey() {
      global default_modifier
      global set_modifier
      global windows
+     global h
      If (InStr(A_ThisHotkey, set_modifier) > 0) {    ; Setting action for window to toggle
           MouseGetPos,,,WinUMID
           WinGet, currentProcessName, ProcessName, ahk_id %WinUMID%
@@ -36,6 +96,9 @@ FireHotkey() {
           ObjRawSet(windows, hkey_noModifiers, {"winUMID": WinUMID, "processFile": currentProcessFile, "processFilename": currentProcessName, "hotkey": hkey_noModifiers})
           
           TrayTip,WOOF! , % hkey_noModifiers . ": for " . currentProcessName . " window."
+          createWindow(h, true)
+          OutputDebug %default_modifier% - %hkey_noModifiers% registered
+          WinActivate, ahk_id %WinUMID%
           Return
      }else {  ; Toggle window 
           OutputDebug, 2 Toggle action -  %default_modifier% + %A_ThisHotkey%
@@ -48,9 +111,6 @@ FireHotkey() {
                          WinRestore ahk_id %WinUMID%
                          WinActivate
                     } Else {
-                         ;SetTitleMatchMode, RegEx
-                         ;WinGet, id, list,,,i)^$|Program\sManager
-                         ;SetTitleMatchMode, 2
                          WinGetPos , X, Y, , , ahk_id %WinUMID%
                          If  ( WinActive("ahk_id " . WinUMID))
                          WinMinimize, ahk_id %WinUMID%
@@ -60,6 +120,7 @@ FireHotkey() {
                }Else {
                     MsgBox, Window must have been closed. Removing this slot. 
                     windows.Delete(A_ThisHotkey)
+                    createWindow(h, true)
                }
           } Else {
                TrayTip,WOOF!, No WinUMID
@@ -69,11 +130,42 @@ FireHotkey() {
      
 }
 
-global windows := {}
 
-ButtonRegister(default_modifier, "LAlt & 1")
-
-!
+createWindow(h, show:=False) {
+     global w  
+    
+     
+     
+     Gui, toggles:New
+     Gui, toggles:Color, 242424
+     ;Gui, toggles:Margin, 2, 8
+     Gui, toggles:Font, s9 Norm c999999, Segoe UI
+     Gui, toggles:-MinimizeBox -MaximizeBox -SysMenu +AlwaysOnTop -Theme -Caption +Owner
+     ; add listview control - will have single raw and column for each process      
+     Gui, toggles:Add, ListView, x4 y5 w%w% h%h% +IconSmall +ReadOnly +0x2000 -E0x200  -0x40000 -0xC00000 +Background0x242424
+     Gui toggles:+LastFound
+     WinSet, Transparent, 230
+     ; Create ImageList for columns icons
+     ImageListID := IL_Create(windows.Count())
+     LV_SetImageList(ImageListID)
+     LV_Delete() ; remove row if any
+     for k, v in windows 
+     {
+          ;add icon to imageList - needed for listview column with icon
+          IconId := IL_Add(ImageListID, v["processFile"], 1)
+          if (A_Index <> IconId){
+               MsgBox, % "Err: A_Index - " . A_Index . ", IconNum - " . IconId  
+          }
+          LV_Add("Icon" . A_Index,v["hotKey"] . ": " .  v["processFileName"])
+          
+     }
+     OutputDebug, Built window
+     if (show){          
+          Gui, toggles:Show, w%w% h%h% x0 y0 
+          OutputDebug, and shown it.    
+     }
+     
+}
 
 for k, v in allowedKeysArr{
      ButtonRegister(default_modifier, v)
@@ -82,104 +174,33 @@ for k, v in allowedKeysArr{
 }
 
 
-GuiEscape:
-GuiClose:
-Gui, Destroy
-
-
-ScrollLock::
-w := A_ScreenWidth,h := 20
-if windows.Count() <= 0
-     Return
-
-Gui +LastFoundExist
-if (WinExist()) {
-     Gui, Destroy
-     Return
-}
 
 
 
-Gui, +LastFound
-WinSet, Transparent, 200
-Gui, Color, 242424
-Gui, Margin, 0, 0
-Gui Font, s9 Norm cFFFFFF, Segoe UI
-Gui -MinimizeBox -MaximizeBox -SysMenu +AlwaysOnTop -Theme -Caption +Owner
 
 
-; add listview control - will have single raw and column for each process 
-Gui Add, ListView, x0 y0 w%w% h%h% +IconSmall +0x2000 -E0x200  -0x40000 -0xC00000 
-+Background0x242424
-DllCall("UxTheme.dll\SetWindowTheme", "Ptr", hLVItems, "WStr", "Explorer", "Ptr", 0)
-; Create ImageList for columns icons
-ImageListID := IL_Create(windows.Count())
-LV_SetImageList(ImageListID)
 
-for k, v in windows 
-{
-     ;add icon to imageList - needed for listview column with icon
-     IconId := IL_Add(ImageListID, v["processFile"], 1)
-     if (A_Index <> IconId){
-          MsgBox, % "Err: A_Index - " . A_Index . ", IconNum - " . IconId  
+ShowCurrentToggles(isHold, taps, state){
+     global w
+     global h 
+
+    OutputDebug, %isHold%, %taps%, %state%
+     if (isHold AND state){
+          WinGet, currentActive, ID, A
+          OutputDebug, Hold
+          Gui, toggles:Show, w%w% h%h% x0 y0 
+          WinActivate, ahk_id %currentActive%
+          KeyWait, %default_modifier%
+          Return
      }
-     LV_Add("Icon" . A_Index,v["hotKey"] . ": " .  v["processFileName"])
+     if (state<>1){
+          OutputDebug, stateOff
+        Gui, toggles:Hide  
+          KeyWait, %default_modifier%
+          Return
+     }
      
 }
-
-;     LV_InsertCol(1, )
-;      Gui Add, Picture, x%x% y%y% w32 h-1 +Icon1, % v["processFile"]
-;MsgBox, % default_modifier . " " . v["hotkey"] . "`n" v["processFilename"] 
-;   Gui Add, Text, x%x2% y%y2% w72 +Center +0xC, % v["hotkey"] . ": " . RegExReplace(v["processFilename"], "\.[^\.]+$", "") 
-;Gui Add, Text, x%x% y%y2% w100 h24, x%x% y%y% y2%y2%
-;}
-
-
-
-Gui, Show, w%w% h%h% x0 y0 
-
-
-
-
-Return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
