@@ -91,7 +91,7 @@ Reload
 Return
 
 ^!v:: 
-SendEvent {Raw}  %Clipboard%
+SendEvent {Raw}%Clipboard%
 Return 
 
 
