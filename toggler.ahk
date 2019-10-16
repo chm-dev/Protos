@@ -189,7 +189,9 @@ ShowCurrentToggles(isHold, taps, state){
           WinGet, currentActive, ID, A
           OutputDebug, Hold
           Gui, toggles:Show, w%w% h%h% x0 y0 
-          WinActivate, ahk_id %currentActive%
+          WinGet, currentActiveState, MinMax, ahk_id %currentActive%
+          if (currentActiveState <> -1)
+            WinActivate, ahk_id %currentActive%          
           KeyWait, %default_modifier%
           Return
      }
