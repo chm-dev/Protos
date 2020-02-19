@@ -1,4 +1,5 @@
-﻿;#SingleInstance Force
+﻿
+;#SingleInstance Force
 ;#Persistent
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
@@ -6,7 +7,48 @@ global ClipSaved
 SetKeyDelay, 0
 SetCapsLockState, AlwaysOff
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
-SetWorkingDir %A_ScriptDir% 
+#include Lib\TapHoldManager.ahk
+
+
+
+thm := new TapHoldManager(,,,"~")	; TapTime / Prefix can now be set here
+thm.Add("LShift", Func("openLauncher"))
+thm.Add("CapsLock", Func("sendMegaModifier"))
+#Include %A_ScriptDir%\toggler.ahk
+
+openLauncher(isHold, taps, state){
+if (taps = 2)
+Send {LAlt Down}{BackSpace}{LAlt Up}
+Return
+}
+
+sendMegaModifier(isHold, taps, state){
+
+if (taps = 2 and state = 1){
+  OutputDebug entry: %isHold%, %taps%, %state%
+Send {LCtrl Down}{LShift Down}{LAlt Down}
+SoundPlay *64
+;SoundBeep 750, 300 
+KeyWait CapsLock        
+OutputDebug after Loop %isHold%, %taps%, %state%
+Send {LCtrl Up}{LShift Up}{LAlt Up}
+}
+
+
+
+
+Return
+}
+
+;~CapsLock:: 
+;Send {LCtrl Down}{LShift Down}{LAlt Down}
+;keyWait, CapsLock
+;Send {LCtrl Up}{LShift Up}{LAlt Up}
+;Return
+
+
+
+
 
 
 getCursorWindow(){
@@ -17,9 +59,6 @@ getCursorWindow(){
      Else
      Return WinUMID 
 }
-
-#Include %A_ScriptDir%\toggler.ahk
-#Include %A_ScriptDir%\dimmer.ahk
 
 
 
@@ -90,6 +129,9 @@ CapsLock & r::
 Reload
 Return
 
+
+
+
 ^!v:: 
 SendEvent {Raw}%Clipboard%
 Return 
@@ -140,11 +182,20 @@ SendInput [sessionId]
 Return
 
 ::rcv:: 
-SendInput \rcon callvote 
+SendInput rcon callvote 
 Return
 
 ::cq3::
-SendInput \connect q3.click
+SendInput connect q3.click
+Return
+
+
+::chm@gm::
+SendInput chmielciu@gmail.com
+Return
+
+::tom@al::
+SendInput tomasz.chmielewski@alexmann.com 
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
@@ -174,6 +225,7 @@ if EWD_WinState = 0  ; Only if the window isn't maximized
      SetTimer, EWD_WatchMouse, 10 ; Track the mouse as the user drags it.
 return
 
+
 EWD_WatchMouse:
 GetKeyState, EWD_LButtonState, LButton, P
 if EWD_LButtonState = U  ; Button has been released, so drag is complete.
@@ -200,8 +252,6 @@ WinMove, ahk_id %EWD_MouseWin%,, EWD_WinX + EWD_MouseX - EWD_MouseStartX, EWD_Wi
 EWD_MouseStartX := EWD_MouseX  ; Update for the next timer-call to this subroutine.
 EWD_MouseStartY := EWD_MouseY
 return
-
-
 
 
 

@@ -1,3 +1,5 @@
+DetectHiddenWindows On
+#InstallKeybdHook
 
 /*
 CapsLock::
@@ -34,13 +36,13 @@ Gui, toggles:Hide
 }
 Return
 */
-#InstallKeybdHook
 #include Lib\TapHoldManager.ahk
+
 
 SetCapsLockState, AlwaysOff
 default_modifier = CapsLock
 set_modifier = LAlt
-remove_modifier = LControl 
+remove_modifier = LCtrl 
 
 allowedKeys = ``,1,2,3,4,5,6,7,8,9,0,F1,F2,F3,F4,F5
 allowedKeysArr := StrSplit(allowedKeys,",") 
@@ -51,8 +53,8 @@ area :=,  old_area :=
 w := A_ScreenWidth, h := 30
 x := 0,y := 0
 
-thm := new TapHoldManager(,,,"~")
-thm.Add("CapsLock", Func("ShowCurrentToggles"))
+thm2 := new TapHoldManager(,,,"~")
+thm2.Add("CapsLock & Space", Func("ShowCurrentToggles"))
 
 
 createWindow(h)
@@ -86,6 +88,7 @@ FireHotkey() {
      global set_modifier
      global windows
      global h
+     OutputDebug,A_ThisHotkey
      If (InStr(A_ThisHotkey, set_modifier) > 0) {    ; Setting action for window to toggle
           MouseGetPos,,,WinUMID
           WinGet, currentProcessName, ProcessName, ahk_id %WinUMID%
@@ -97,11 +100,13 @@ FireHotkey() {
           
           TrayTip,WOOF! , % hkey_noModifiers . ": for " . currentProcessName . " window."
           createWindow(h, true)
-          OutputDebug %default_modifier% - %hkey_noModifiers% registered
+          ;OutputDebug %default_modifier% - %hkey_noModifiers% registered
           WinActivate, ahk_id %WinUMID%
+          sleep 1000
+          createWindow(h, false)
           Return
      }else {  ; Toggle window 
-          OutputDebug, 2 Toggle action -  %default_modifier% + %A_ThisHotkey%
+         ; OutputDebug, 2 Toggle action -  %default_modifier% + %A_ThisHotkey%
           if (windows[A_ThisHotkey]){
                WinUMID := windows[A_ThisHotkey]["WinUMID"]
                if (ID := WinExist("ahk_id " . WinUMID)){
@@ -180,6 +185,7 @@ for k, v in allowedKeysArr{
 
 
 
+
 ShowCurrentToggles(isHold, taps, state){
      global w
      global h 
@@ -206,6 +212,7 @@ ShowCurrentToggles(isHold, taps, state){
 
 
 
+                     
 
 
 
