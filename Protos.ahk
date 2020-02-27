@@ -1,5 +1,4 @@
-﻿
-;#SingleInstance Force
+﻿;#SingleInstance Force
 ;#Persistent
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
@@ -7,37 +6,38 @@ global ClipSaved
 SetKeyDelay, 0
 SetCapsLockState, AlwaysOff
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
+
 #include Lib\TapHoldManager.ahk
 
-
-
 thm := new TapHoldManager(,,,"~")	; TapTime / Prefix can now be set here
-thm.Add("LShift", Func("openLauncher"))
+thm.Add("LCtrl", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
+    
 #Include %A_ScriptDir%\toggler.ahk
+#include %A_ScriptDir%\audioDevices.ahk
 
 openLauncher(isHold, taps, state){
-if (taps = 2)
-Send {LAlt Down}{BackSpace}{LAlt Up}
-Return
+    if (taps = 2)
+        Send {LAlt Down}{BackSpace}{LAlt Up}
+    Return
 }
 
 sendMegaModifier(isHold, taps, state){
-
-if (taps = 2 and state = 1){
-  OutputDebug entry: %isHold%, %taps%, %state%
-Send {LCtrl Down}{LShift Down}{LAlt Down}
-SoundPlay *64
-;SoundBeep 750, 300 
-KeyWait CapsLock        
-OutputDebug after Loop %isHold%, %taps%, %state%
-Send {LCtrl Up}{LShift Up}{LAlt Up}
-}
-
-
-
-
-Return
+    
+    if (taps = 2 and state = 1){
+        OutputDebug entry: %isHold%, %taps%, %state%
+        Send {LCtrl Down}{LShift Down}{LAlt Down}
+        SoundPlay *64
+        ;SoundBeep 750, 300 
+        KeyWait CapsLock        
+        OutputDebug after Loop %isHold%, %taps%, %state%
+            Send {LCtrl Up}{LShift Up}{LAlt Up}
+    }
+    
+    
+    
+    
+    Return
 }
 
 ;~CapsLock:: 
@@ -46,79 +46,70 @@ Return
 ;Send {LCtrl Up}{LShift Up}{LAlt Up}
 ;Return
 
-
-
-
-
-
 getCursorWindow(){
-     MouseGetPos,,,WinUMID
-     WinGet, pName, ProcessName, ahk_id %WinUMID%
-     If (InStr(pName, "explorer") or pName = "")	
-     Return -1
-     Else
-     Return WinUMID 
+    MouseGetPos,,,WinUMID
+    WinGet, pName, ProcessName, ahk_id %WinUMID%
+    If (InStr(pName, "explorer") or pName = "")	
+        Return -1
+    Else
+        Return WinUMID 
 }
-
-
-
 
 CapsLock & LButton:: 
-WinUMID := getCursorWindow()
-if (WinUMID = -1) 
-     Return
-WinSet  AlwaysOnTop, Toggle, ahk_id %WinUMID%
-WinGet, exs, ExStyle, ahk_id %WinUMID%
-if (exs & 0x8) {   ;Always on top on
-     WinSet, Transparent, 240, ahk_id %WinUMID%
-}else { ; AOT Off
-     WinSet, Transparent, Off, ahk_id %WinUMID%
-}
+    WinUMID := getCursorWindow()
+    if (WinUMID = -1) 
+        Return
+    WinSet  AlwaysOnTop, Toggle, ahk_id %WinUMID%
+    WinGet, exs, ExStyle, ahk_id %WinUMID%
+    if (exs & 0x8) {   ;Always on top on
+        WinSet, Transparent, 240, ahk_id %WinUMID%
+    }else { ; AOT Off
+        WinSet, Transparent, Off, ahk_id %WinUMID%
+    }
 Return
 
-
 CapsLock & WheelDown::
-WinUMID := getCursorWindow()
-if WinUMID = -1 
-     Return  
-WinMinimize ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1 
+        Return  
+    WinMinimize ahk_id %WinUMID%
 Return
 
 CapsLock & WheelUp::
-WinUMID := getCursorWindow()
-if WinUMID = -1 
-     Return 
-WinMaximize ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1 
+        Return 
+    WinMaximize ahk_id %WinUMID%
 Return
 
 CapsLock & MButton::
-WinUMID := getCursorWindow()
-if WinUMID = -1 
-     Return 
-WinRestore ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1 
+        Return 
+    WinRestore ahk_id %WinUMID%
 Return
 
 CapsLock & XButton1:: 
-WinUMID := getCursorWindow()
-if WinUMID = -1 
-     Return 
-WinActivate, ahk_id %WinUMID%
-Send #{Left}
+    WinUMID := getCursorWindow()
+    if WinUMID = -1 
+        Return 
+    WinActivate, ahk_id %WinUMID%
+    Send #{Left}
 Return
 
 CapsLock & XButton2:: 
-WinUMID := getCursorWindow()
-if WinUMID = -1 
-     Return 
-
-WinActivate, ahk_id %WinUMID%
-Send #{Right}
+    WinUMID := getCursorWindow()
+    if WinUMID = -1 
+        Return 
+    
+    WinActivate, ahk_id %WinUMID%
+    Send #{Right}
 Return
 !+v::
-global ClipSaved := ClipboardAll 
-Clipboard = <process name="__selection__ISAAC Deloitte - TALEO UI Chrome automation" type="object" runmode="Exclusive"><stage stageid="436ee60b-0d79-4ee8-868b-f34d0083ac02" name="Action1" type="Action"><subsheetid>fbf83eaa-f7ce-4c72-ae74-91471a5f8a72</subsheetid><loginhibit /><narrative></narrative><displayx>195</displayx><displayy>-135</displayy><displaywidth>60</displaywidth><displayheight>30</displayheight><font family="Segoe UI" size="10" style="Regular" color="000000" /><inputs><input type="text" name="Css selector" expr="" /><input type="text" name="Session ID" expr="[sessionId]" /><input type="flag" name="Optional: Omit exception." narrative="Default is False" expr="" /><input type="number" name="Optional: Wait for element (ms)" expr="" /></inputs><outputs><output type="flag" name="success?" stage="" /></outputs><resource object="ChromeDriver" action="Click on element" /></stage></process>
-Sleep, 50
-Send {LCtrl down}v{LCtrl up}
+    global ClipSaved := ClipboardAll 
+    Clipboard = <process name="__selection__ISAAC Deloitte - TALEO UI Chrome automation" type="object" runmode="Exclusive"><stage stageid="436ee60b-0d79-4ee8-868b-f34d0083ac02" name="Action1" type="Action"><subsheetid>fbf83eaa-f7ce-4c72-ae74-91471a5f8a72</subsheetid><loginhibit /><narrative></narrative><displayx>195</displayx><displayy>-135</displayy><displaywidth>60</displaywidth><displayheight>30</displayheight><font family="Segoe UI" size="10" style="Regular" color="000000" /><inputs><input type="text" name="Css selector" expr="" /><input type="text" name="Session ID" expr="[sessionId]" /><input type="flag" name="Optional: Omit exception." narrative="Default is False" expr="" /><input type="number" name="Optional: Wait for element (ms)" expr="" /></inputs><outputs><output type="flag" name="success?" stage="" /></outputs><resource object="ChromeDriver" action="Click on element" /></stage></process>
+        Sleep, 50
+    Send {LCtrl down}v{LCtrl up}
 Return
 
 ;AppsKey & l:: 
@@ -126,32 +117,27 @@ Return
 ;Return
 
 CapsLock & r::
-Reload
+    Reload
 Return
-
-
-
 
 ^!v:: 
-SendEvent {Raw}%Clipboard%
+    SendEvent {Raw}%Clipboard%
 Return 
 
-
 CapsLock & v::
-if (InStr(Clipboard, "document.query") = 0){
-
-SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
-SendStr := StrReplace(SendStr, """""", """",,-1)
-;MsgBox, %Clipboard%, %SendStr%
-SendEvent {Raw} document.querySelector('%SendStr%')
-} Else {
-SendStr := StrReplace(Clipboard, """", """""")
-SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
-
-SendEvent "%SendStr%"
-}
+    if (InStr(Clipboard, "document.query") = 0){
+        
+        SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
+        SendStr := StrReplace(SendStr, """""", """",,-1)
+        ;MsgBox, %Clipboard%, %SendStr%
+        SendEvent {Raw} document.querySelector('%SendStr%')
+    } Else {
+        SendStr := StrReplace(Clipboard, """", """""")
+        SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
+        
+        SendEvent "%SendStr%"
+    }
 Return
-
 
 ^!WheelUp::Send {Volume_Up 3}
 ^!WheelDown::Send {Volume_Down 3}
@@ -189,12 +175,11 @@ Return
 SendInput connect q3.click
 Return
 
-
-::chm@gm::
+::@gm::
 SendInput chmielciu@gmail.com
 Return
 
-::tom@al::
+::@al::
 SendInput tomasz.chmielewski@alexmann.com 
 Return
 
@@ -202,66 +187,52 @@ Return
 
 ;-Caption
 ScrollLock & LButton::
-WinSet, Style, -0xC00000, A
+    WinSet, Style, -0xC00000, A
 return
 ;
 
 ;+Caption
 ScrollLock & RButton::
-WinSet, Style, +0xC00000, A
+    WinSet, Style, +0xC00000, A
 return
 ;
-
 
 ; Note: You can optionally release the ALT key after pressing down the mouse button
 ; rather than holding it down the whole time.
 
 ~Alt & LButton::
-CoordMode, Mouse  ; Switch to screen/absolute coordinates.
-MouseGetPos, EWD_MouseStartX, EWD_MouseStartY, EWD_MouseWin
-WinGetPos, EWD_OriginalPosX, EWD_OriginalPosY,,, ahk_id %EWD_MouseWin%
-WinGet, EWD_WinState, MinMax, ahk_id %EWD_MouseWin%
-if EWD_WinState = 0  ; Only if the window isn't maximized
-     SetTimer, EWD_WatchMouse, 10 ; Track the mouse as the user drags it.
+    CoordMode, Mouse  ; Switch to screen/absolute coordinates.
+    MouseGetPos, EWD_MouseStartX, EWD_MouseStartY, EWD_MouseWin
+    WinGetPos, EWD_OriginalPosX, EWD_OriginalPosY,,, ahk_id %EWD_MouseWin%
+    WinGet, EWD_WinState, MinMax, ahk_id %EWD_MouseWin%
+    if EWD_WinState = 0  ; Only if the window isn't maximized
+        SetTimer, EWD_WatchMouse, 10 ; Track the mouse as the user drags it.
 return
-
 
 EWD_WatchMouse:
-GetKeyState, EWD_LButtonState, LButton, P
-if EWD_LButtonState = U  ; Button has been released, so drag is complete.
-{
-     SetTimer, EWD_WatchMouse, off
-     return
-}
-
-GetKeyState, EWD_EscapeState, Escape, P
-if EWD_EscapeState = D  ; Escape has been pressed, so drag is cancelled.
-{
-     SetTimer, EWD_WatchMouse, off
-     WinMove, ahk_id %EWD_MouseWin%,, %EWD_OriginalPosX%, %EWD_OriginalPosY%
-     return
-}
-
-; Otherwise, reposition the window to match the change in mouse coordinates
-; caused by the user having dragged the mouse:
-CoordMode, Mouse
-MouseGetPos, EWD_MouseX, EWD_MouseY
-WinGetPos, EWD_WinX, EWD_WinY,,, ahk_id %EWD_MouseWin%
-SetWinDelay, -1   ; Makes the below move faster/smoother.
-WinMove, ahk_id %EWD_MouseWin%,, EWD_WinX + EWD_MouseX - EWD_MouseStartX, EWD_WinY + EWD_MouseY - EWD_MouseStartY
-EWD_MouseStartX := EWD_MouseX  ; Update for the next timer-call to this subroutine.
-EWD_MouseStartY := EWD_MouseY
+    GetKeyState, EWD_LButtonState, LButton, P
+    if EWD_LButtonState = U  ; Button has been released, so drag is complete.
+    {
+        SetTimer, EWD_WatchMouse, off
+        return
+    }
+    
+    GetKeyState, EWD_EscapeState, Escape, P
+    if EWD_EscapeState = D  ; Escape has been pressed, so drag is cancelled.
+    {
+        SetTimer, EWD_WatchMouse, off
+        WinMove, ahk_id %EWD_MouseWin%,, %EWD_OriginalPosX%, %EWD_OriginalPosY%
+        return
+    }
+    
+    ; Otherwise, reposition the window to match the change in mouse coordinates
+    ; caused by the user having dragged the mouse:
+    CoordMode, Mouse
+    MouseGetPos, EWD_MouseX, EWD_MouseY
+    WinGetPos, EWD_WinX, EWD_WinY,,, ahk_id %EWD_MouseWin%
+    SetWinDelay, -1   ; Makes the below move faster/smoother.
+    WinMove, ahk_id %EWD_MouseWin%,, EWD_WinX + EWD_MouseX - EWD_MouseStartX, EWD_WinY + EWD_MouseY - EWD_MouseStartY
+    EWD_MouseStartX := EWD_MouseX  ; Update for the next timer-call to this subroutine.
+    EWD_MouseStartY := EWD_MouseY
 return
-
-
-
-
-
-
-
-
-
-
-
-
 
