@@ -1,6 +1,6 @@
 ﻿#Persistent 
 #SingleInstance Force
-#InstallKeybdHook
+    #InstallKeybdHook
 #InstallMouseHook
 DetectHiddenWindows, On
 SetTitleMatchMode, RegEx
@@ -11,26 +11,33 @@ SetKeyDelay, 0
 SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
+Menu, Tray, Add
+Menu, Tray, Add, Fix, regFix
 
 global ClipSaved
 global cmderMode := 0
 
 global playerExe = "Spotify.exe"
-global playerHWND 
+    global playerHWND 
 playerPath = %A_AppData%\Spotify\%playerExe%
-playerWinTitle = ahk_exe %playerExe% 
+    playerWinTitle = ahk_exe %playerExe% 
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
+    
 
-
-global browserExe = "C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app=chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
+global browserExe = "C:\vivaldi\Application\vivaldi.exe --window-size=480x480 --app=chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global thm
-
-#include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
+    
 #Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
+
+regfix(){
+    RunWait, "%A_ScriptDir%\3rdParty\nircmd.exe" elevate "%A_AhkPath%" "%A_ScriptDir%\elevate\fix.ahk", UseErrorLevel
+    MsgBox, 0 - success,1 - failed: %ErrorLevel%
+    Return %ErrorLevel%
+}
 
 openLauncher(isHold, taps, state){
     if (taps = 2 and GetKeyState("ScrollLock", "T")=0)
@@ -55,13 +62,14 @@ sendMegaModifier(isHold, taps, state){
 releaseAllModifiers() 
 { 
     list = Control|Alt|Shift 
-    Loop Parse, list, | 
+        Loop Parse, list, | 
     { 
         if (GetKeyState(A_LoopField)) 
             send {Blind}{%A_LoopField% up}       ; {Blind} is added.
         } 
 } 
 
+#Include %A_ScriptDir%\temp.ahk
 ~ScrollLock::
     If (GetKeyState("ScrollLock", "T")){
         Menu, Tray, Icon, %A_ScriptDir%\protos_off.png, 1
@@ -75,7 +83,7 @@ releaseAllModifiers()
 Return
 
 #If, GetKeyState("ScrollLock", "T") = 0  ;only if scrolllock is off
-Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
+    Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
 isWindowVisible(WTitle){
     if not DllCall("IsWindowVisible", "UInt", WinExist(WTitle)){
@@ -229,12 +237,12 @@ AppsKey:: LWin
 ;$+#:: LWin
 ;AppsKey:: LWin
 #If
-
+    
 CapsLock & s:: 
     
     OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
-    OutputDebug, %ErrorLevel% 
+        OutputDebug, %ErrorLevel% 
     
     if (ErrorLevel){
         
@@ -265,13 +273,12 @@ CapsLock & s::
     }else{
         OutputDebug  not running, start
         Run, %A_AppData%\Spotify\Spotify.exe
-    }  
+        }  
 Return
 #If WinActive("ahk_group SpotifyGrp")
-~Esc::WinHide, A
+    ~Esc::WinHide, A
 #If
-
-
+    
 
 ::dqs:: 
 SendInput document.querySelector(''){Left 2}
@@ -325,7 +332,7 @@ return
 CapsLock & y::Run, %browserExe%
 CapsLock & t::
     releaseAllModifiers()
-    Send {Blind}{Ctrl down}c{Ctrl up}
+        Send {Blind}{Ctrl down}c{Ctrl up}
     id := WinExist("Mate Translate Unpinned")
     if (!id) {
         Run, %browserExe%
@@ -343,8 +350,7 @@ Capslock & w:: Run, %A_AhkPath% "C:\Dev\AHK\AHK\WindowSpy.ahk"
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
-
-
+    
 
 ~Alt & LButton:: 
     CoordMode, Mouse  ; Switch to screen/absolute coordinates.
@@ -356,7 +362,7 @@ Capslock & w:: Run, %A_AhkPath% "C:\Dev\AHK\AHK\WindowSpy.ahk"
 return
 
 #If
-
+    
 EWD_WatchMouse: 
     GetKeyState, EWD_LButtonState, LButton, P
     if EWD_LButtonState = U  ; Button has been relseased, so drag is complete.
