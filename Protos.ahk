@@ -24,7 +24,15 @@ playerPath = %A_AppData%\Spotify\%playerExe%
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
     
 
+<<<<<<< HEAD
 global browserExe = "C:\vivaldi\Application\vivaldi.exe --window-size=480x480 --app=chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
+=======
+global browserExe="C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
+global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"
+global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
+global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
+global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
+>>>>>>> 6a0581ead5f9207a65fc2e771472fad29ea41be9
 global thm
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
@@ -50,12 +58,12 @@ sendMegaModifier(isHold, taps, state){
     if (taps = 2 and state = 1 and GetKeyState("ScrollLock", "T")=0){
         OutputDebug entry: %isHold%, %taps%, %state%
         Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}
-        SoundPlay %A_ScriptDir%\sounds\light_ball_02.wav
+        SoundPlay %A_ScriptDir%\sounds\toggle_on.wav
         ;SoundBeep 750, 300 
         KeyWait CapsLock, T1.4        
         OutputDebug after Loop %isHold%, %taps%, %state%
-            Send {Blind}{LCtrl Up}{LShift Up}{LAlt Up}
-        SoundPlay %A_ScriptDir%\sounds\light_ball_01.wav
+        Send {Blind}{LCtrl Up}{LShift Up}{LAlt Up}
+        SoundPlay %A_ScriptDir%\sounds\toggle_off.wav
     }   
     Return
 }
@@ -71,11 +79,12 @@ releaseAllModifiers()
 
 #Include %A_ScriptDir%\temp.ahk
 ~ScrollLock::
-    If (GetKeyState("ScrollLock", "T")){
+    If (GetKeyState("ScrollLock", "T") = 1)
+    {
         Menu, Tray, Icon, %A_ScriptDir%\protos_off.png, 1
-        SoundPlay, %A_ScriptDir%\sounds\protos_off.mp3
-        
-    }Else {
+        SoundPlay, %A_ScriptDir%\sounds\protos_off.mp3  
+    }
+    Else {
         Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
         SoundPlay, %A_ScriptDir%\sounds\protos_on.mp3
     }
@@ -195,8 +204,8 @@ XButton1 & MButton::
 Return
 XButton1:: Return
 XButton2:: Return
-^XButton1:: Send #^{Right}
-^XButton2:: Send #^{Left}
+^XButton1:: Send {XButton1}
+^XButton2:: Send {XButton2}
 !XButton1::
     activateCursorWindow()  
     Send #+{Right}
@@ -278,7 +287,14 @@ Return
 #If WinActive("ahk_group SpotifyGrp")
     ~Esc::WinHide, A
 #If
+<<<<<<< HEAD
     
+=======
+
+#If WinActive("ahk_exe dopus.exe")
+MButton::Send {Enter}
+#If
+>>>>>>> 6a0581ead5f9207a65fc2e771472fad29ea41be9
 
 ::dqs:: 
 SendInput document.querySelector(''){Left 2}
@@ -311,6 +327,7 @@ Return
 ;---------- EXPERIMENTS BELOW ---------------------------
 *Pause:: 
     Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}
+    SetCapsLockState, Off
     SetCapsLockState, AlwaysOff
     SoundPlay %A_ScriptDir%\sounds\release_all.mp3
 Return
@@ -328,14 +345,14 @@ return
 
 ; Note: You can optionally release the ALT key after pressing down the mouse button
 ; rather than holding it down the whole time.
-
-CapsLock & y::Run, %browserExe%
+CapsLock & j::Run, %browserExe%%browserJoin%
+CapsLock & y::Run, %browserExe%%browserTranslate%
 CapsLock & t::
     releaseAllModifiers()
         Send {Blind}{Ctrl down}c{Ctrl up}
     id := WinExist("Mate Translate Unpinned")
     if (!id) {
-        Run, %browserExe%
+        Run, %browserExe%%browserTranslate%
         WinWait, Mate Translate Unpinned
         id := WinExist("Mate Translate Unpinned")
     }
@@ -344,13 +361,16 @@ CapsLock & t::
     Sleep 200
     Send {Blind}{Ctrl down}av{Ctrl up}
 Return
-
+CapsLock & 0:: Run, %browserExe%%browserWebmaker%
 Capslock & w:: Run, %A_AhkPath% "C:\Dev\AHK\AHK\WindowSpy.ahk"
 
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
+<<<<<<< HEAD
     
+=======
+>>>>>>> 6a0581ead5f9207a65fc2e771472fad29ea41be9
 
 ~Alt & LButton:: 
     CoordMode, Mouse  ; Switch to screen/absolute coordinates.

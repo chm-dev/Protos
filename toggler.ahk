@@ -34,7 +34,7 @@ ScrollLock::Gui, toggles:Show, w%w% h%h% x0 y0
     }
 Return
 */
-#Include Lib\TapHoldManager.ahk
+#Include %A_ScriptDir%\Lib\TapHoldManager.ahk
 
 ;SetCapsLockState, AlwaysOff
 default_modifier = CapsLock
