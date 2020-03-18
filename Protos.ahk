@@ -17,8 +17,8 @@ global cmderMode := 0
 
 global playerExe = "Spotify.exe"
 global playerHWND 
-playerPath = %A_AppData%\Spotify\%playerExe%
-playerWinTitle = ahk_exe %playerExe% 
+playerPath=%A_AppData%\Spotify\%playerExe%
+playerWinTitle=ahk_exe %playerExe% 
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
 
 global browserExe="C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
@@ -34,7 +34,7 @@ thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
 #Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
-
+#Include %A_ScriptDir%\winresize.ahk
 openLauncher(isHold, taps, state){
     if (taps = 2 and GetKeyState("ScrollLock", "T")=0)
         Send {LAlt Down}{BackSpace}{LAlt Up}
@@ -53,7 +53,7 @@ sendMegaModifier(isHold, taps, state){
         Send {Blind}{LCtrl Up}{LShift Up}{LAlt Up}
         SoundPlay %A_ScriptDir%\sounds\toggle_off.wav
     }   
-    Return
+    Return 
 }
 releaseAllModifiers() 
 { 
@@ -119,6 +119,28 @@ CapsLock & LButton::
     }else { ; AOT Off
         WinSet, Transparent, Off, ahk_id %WinUMID%
     }
+Return
+
+CapsLock & '::
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
+Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
+Return
+
+
+CapsLock & [:: 
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 D6000000 0,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur true,,Hide
+Return
+
+CapsLock & ]:: 
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur false,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
 Return
 
 CapsLock & WheelDown:: 
@@ -223,11 +245,11 @@ Return
 
 #If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0
     
-LWin:: 
+`:: 
     Send {LAlt Down}``{LAlt Up}
 Return
-`::LWin
-^`::Send ``
+
+!`::Send ``
 
 AppsKey:: LWin
 ;$+#:: LWin
@@ -276,7 +298,7 @@ Return
 #If
 
 #If WinActive("ahk_exe dopus.exe")
-MButton::Send {Enter}
+    MButton::Send {Enter}
 #If
 
 ::dqs:: 
@@ -345,7 +367,7 @@ CapsLock & t::
     Send {Blind}{Ctrl down}av{Ctrl up}
 Return
 CapsLock & 0:: Run, %browserExe%%browserWebmaker%
-Capslock & w:: Run, %A_AhkPath% "C:\Dev\AHK\AHK\WindowSpy.ahk"
+Capslock & w:: Run, %A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
 
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
