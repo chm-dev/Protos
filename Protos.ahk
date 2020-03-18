@@ -12,11 +12,12 @@ SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
-global ClipSaved
-global cmderMode := 0
+ClipSaved=
+cmderMode:=0
+launcherMode:=0
 
-global playerExe = "Spotify.exe"
-global playerHWND 
+playerExe:="Spotify\.exe"
+playerHWND=
 playerPath=%A_AppData%\Spotify\%playerExe%
 playerWinTitle=ahk_exe %playerExe% 
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
@@ -27,7 +28,6 @@ global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pa
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
 global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
 global thm
-
 #include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
@@ -45,7 +45,8 @@ sendMegaModifier(isHold, taps, state){
     
     if (taps = 2 and state = 1 and GetKeyState("ScrollLock", "T")=0){
         OutputDebug entry: %isHold%, %taps%, %state%
-        Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}
+        Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}{CapsLock Up}
+        
         SoundPlay %A_ScriptDir%\sounds\toggle_on.wav
         ;SoundBeep 750, 300 
         KeyWait CapsLock, T1.4        
@@ -107,6 +108,13 @@ activateCursorWindow(){
     OutputDebug, % WinGetTitle, `% "ahk_id " . getCursorWindow()
     WinActivate, % "ahk_id " . getCursorWindow()
 }
+;=== BEGIN === 
+; == Debug ==
+CapsLock & r:: 
+    Reload
+Return
+
+; == Start of script ==
 
 CapsLock & LButton::
     WinUMID := getCursorWindow()
@@ -124,10 +132,9 @@ Return
 CapsLock & '::
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
-Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
 Return
-
 
 CapsLock & [:: 
     hwnd:=getCursorWindow()
@@ -176,14 +183,6 @@ CapsLock & XButton2::
     
     WinActivate, ahk_id %WinUMID%
     Send #{Right}
-Return
-
-;AppsKey & l:: 
-;MsgBox l
-;Return
-
-CapsLock & r:: 
-    Reload
 Return
 
 ^!v:: 
@@ -245,10 +244,9 @@ Return
 
 #If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0
     
-`:: 
-    Send {LAlt Down}``{LAlt Up}
-Return
-
+`::!` 
+;     Send {LAlt Down}``{LAlt Up}
+; Return
 !`::Send ``
 
 AppsKey:: LWin
@@ -256,16 +254,30 @@ AppsKey:: LWin
 ;AppsKey:: LWin
 #If
 
-CapsLock & s:: 
-    
-    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
+CapsLock & LAlt:: 
+    if (launcherMode = 0) {
+        launcherMode := 1
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_on.wav
+    }else {
+        launcherMode := 0
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_off.wav
+    }
+Return
+
+#If launcherMode = 1 and GetKeyState("ScrollLock", "T") = 0
+~LWin up::
+If (A_PriorKey="LWin")
+    Send, !{Backspace}  
+Return    
+#If
+
+CapsLock & s::
+    WinGet, num, Count, ahk_group SpotifyGrp
+    ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
     OutputDebug, %ErrorLevel% 
     
-    if (ErrorLevel){
-        
-        
-        
+    if (ErrorLevel){      
         grp := "ahk_group SpotifyGrp"
         WinGet, hwnd,ID, %grp%
         playerHWND = ahk_id %hwnd%
@@ -330,6 +342,7 @@ SendInput tomasz.chmielewski@alexmann.com
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+
 *Pause:: 
     Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}
     SetCapsLockState, Off
@@ -340,7 +353,6 @@ Return
 AppsKey & LButton:: 
     WinSet, Style, -0xC00000, A
 return
-;
 
 ;+Caption
 AppsKey & RButton:: 
@@ -364,10 +376,23 @@ CapsLock & t::
     WinWait, ahk_id %id%
     WinActivate 
     Sleep 200
-    Send {Blind}{Ctrl down}av{Ctrl up}
+    Send {Blind}{Ctrl down}v{Ctrl up}
 Return
+
+^+!w:: Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
+
 CapsLock & 0:: Run, %browserExe%%browserWebmaker%
-Capslock & w:: Run, %A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
+Capslock & w::  
+    If (GetKeySC(Key))
+        
+    If (id:=WinExist("")) 
+    {
+        WinRestore, ahk_id %id%
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
+Return
 
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
