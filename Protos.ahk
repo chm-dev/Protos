@@ -36,7 +36,7 @@ thm.Add("CapsLock", Func("sendMegaModifier"))
 #Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
 #Include %A_ScriptDir%\winresize.ahk
 openLauncher(isHold, taps, state){
-    if (taps = 2 and GetKeyState("ScrollLock", "T")=0)
+    if (taps = 2 and GetKeyState("ScrollLock", "T")=0 and launcherMode=0)
         Send {LAlt Down}{BackSpace}{LAlt Up}
     Return
 }
@@ -240,6 +240,7 @@ CapsLock & LWin::
         cmderMode := 0
         SoundPlay, %A_ScriptDir%\sounds\cmder_mode_off.mp3
     }
+    Send {Blind}{CapsLock Up}
 Return
 
 #If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0
@@ -262,12 +263,17 @@ CapsLock & LAlt::
         launcherMode := 0
         SoundPlay, %A_ScriptDir%\sounds\launcher_mode_off.wav
     }
+    Send {CapsLock Up}
 Return
 
 #If launcherMode = 1 and GetKeyState("ScrollLock", "T") = 0
-~LWin up::
-If (A_PriorKey="LWin")
-    Send, !{Backspace}  
+    
+~LWin::   
+    Send {Blind}{Ctrl}
+    KeyWait, LWin   
+    If (InStr(A_PriorKey,"LWin"))
+        Send {LAlt Down}{BackSpace}{LAlt Up}
+    
 Return    
 #If
 
