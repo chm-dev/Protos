@@ -170,6 +170,12 @@ CapsLock & '::
     Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
 Return
 
+CapsLock & p:: 
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 0 0 0,,Hide
+Return
+
 CapsLock & [:: 
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
