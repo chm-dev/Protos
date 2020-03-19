@@ -20,5 +20,5 @@ Return
 ^XButton1::ControlSend,,{Enter},%WindowTitle%
 
 #c::
-ControlClick,WindowsForms10.BUTTON.app.0.36c601b_r6_ad19, %WindowTitle%
+ControlClick,WindowsForms10.BUTTON.app.0.36c601b_r6_ad117, %WindowTitle%
 Return
