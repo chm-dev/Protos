@@ -19,7 +19,7 @@ vol_PosX = -1
 vol_PosY = 900
 vol_Width = 320  ; width of bar
 vol_Thick:=20  ; thickness of bar
-vol_PosY:=(A_ScreenHeight-(3*vol_Thick))
+vol_PosY:=(A_ScreenHeight-(4*vol_Thick))
 getLevels()
 ; If your keyboard has multimedia buttons for Volume, you can
 ; try changing the below hotkeys to use them by specifying
@@ -66,7 +66,7 @@ vol_WaveUp:
     If vol_Wave < 100
     {
         Run, %A_ScriptDir%\3rdParty\soundvolumeview.exe /ChangeVolume Spotify.exe +%vol_Step%
-        vol_Wave:=vol_Wave+vol_Step
+            vol_Wave:=vol_Wave+vol_Step
         OutputDebug %vol_Wave%     
     }
     Gosub, vol_ShowBars
@@ -76,7 +76,7 @@ vol_WaveDown:
     If vol_Wave > 0
     {
         Run, %A_ScriptDir%\3rdParty\soundvolumeview.exe /ChangeVolume Spotify.exe -%vol_Step%
-        vol_Wave:=vol_Wave-vol_Step
+            vol_Wave:=vol_Wave-vol_Step
         OutputDebug %vol_Wave%       
     }
     Gosub, vol_ShowBars
@@ -148,7 +148,7 @@ getLevels(){
     global vol_Wave
     ;RunWait, %A_ScriptDir%\3rdParty\soundvolumeview.exe /GetPercent Spotify.exe,, UseErrorLevel  
     RunWait, %A_ScriptDir%\3rdParty\soundvolumeview.exe /GetPercent Spotify.exe,, UseErrorLevel  
-    vol_Wave:=Round(errorlevel / 10)
+        vol_Wave:=Round(errorlevel / 10)
     OutputDebug vol_Wave %vol_Wave%
     RunWait, %A_ScriptDir%\3rdParty\soundvolumeview.exe /GetPercent Speakers,, UseErrorLevel
     vol_Master:= (errorlevel // 10)
