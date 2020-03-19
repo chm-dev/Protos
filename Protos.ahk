@@ -13,8 +13,11 @@ SetNumLockState, Off
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
 ClipSaved=
-cmderMode:=0
-launcherMode:=0
+cmderMode=0
+launcherMode=0
+resizeMode=0
+
+resizeStep=80 ;winresize
 
 playerExe:="Spotify\.exe"
 playerHWND=
@@ -33,12 +36,36 @@ global thm
 thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
-#Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
+
+; it has to be after first capslock definitions
+
+; these share same mouse mods+wheel actions
+#Include %A_ScriptDir%\toggler.ahk
+#Include %A_ScriptDir%\volControl.ahk                     
 #Include %A_ScriptDir%\winresize.ahk
+^!WheelUp::   
+    if resizeMode=0 
+        Gosub, vol_MasterUp
+    else 
+        Gosub, win_enlarge 
+Return
+^!WheelDown::
+    if resizeMode=0 
+        Gosub, vol_MasterDown
+    else 
+        Gosub, win_shrink
+Return
+!+WheelUp::Gosub vol_WaveUp       ; Shift+Win+UpArrow
+!+WheelDown::Gosub vol_WaveDown
+;so we have to deal with it here
+
+; 
+
 openLauncher(isHold, taps, state){
+    global launcherMode
     if (taps = 2 and GetKeyState("ScrollLock", "T")=0 and launcherMode=0)
         Send {LAlt Down}{BackSpace}{LAlt Up}
-    Return
+Return
 }
 
 sendMegaModifier(isHold, taps, state){
@@ -54,7 +81,7 @@ sendMegaModifier(isHold, taps, state){
         Send {Blind}{LCtrl Up}{LShift Up}{LAlt Up}
         SoundPlay %A_ScriptDir%\sounds\toggle_off.wav
     }   
-    Return 
+Return 
 }
 releaseAllModifiers() 
 { 
@@ -204,8 +231,6 @@ CapsLock & v::
     }
 Return
 
-;^!WheelUp::Send ^!{WheelUp} ; Send {Volume_Up 3}
-;^!WheelDown:: Send +!{WheelDown}
 XButton1 & MButton:: 
 ^!MButton:: 
     Send {Volume_Mute}
@@ -243,16 +268,9 @@ CapsLock & LWin::
     Send {Blind}{CapsLock Up}
 Return
 
-#If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0
-    
-`::!` 
-;     Send {LAlt Down}``{LAlt Up}
-; Return
+#If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0   
+    `::!` 
 !`::Send ``
-
-AppsKey:: LWin
-;$+#:: LWin
-;AppsKey:: LWin
 #If
 
 CapsLock & LAlt:: 
@@ -268,6 +286,7 @@ Return
 
 #If launcherMode = 1 and GetKeyState("ScrollLock", "T") = 0
     
+;to understand what is going on with LWin here check #MenuMaskKey in ahk help
 ~LWin::   
     Send {Blind}{Ctrl}
     KeyWait, LWin   
@@ -276,6 +295,16 @@ Return
     
 Return    
 #If
+CapsLock & LCtrl:: 
+    if (resizemode = 0) {
+        resizemode := 1
+        SoundPlay, %A_ScriptDir%\sounds\resizemode_on.wav
+    }else {
+        resizemode := 0
+        SoundPlay, %A_ScriptDir%\sounds\resizemode_off.wav
+    }
+    Send {Blind}{CapsLock Up}
+Return
 
 CapsLock & s::
     WinGet, num, Count, ahk_group SpotifyGrp
@@ -385,20 +414,30 @@ CapsLock & t::
     Send {Blind}{Ctrl down}v{Ctrl up}
 Return
 
-^+!w:: Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
+!^w:: 
+    If (id:=WinExist("Window Spy ahk_class AutoHotkeyGUI")) 
+    {
+        
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
+Return
 
 CapsLock & 0:: Run, %browserExe%%browserWebmaker%
-Capslock & w::  
-    If (GetKeySC(Key))
-        
-    If (id:=WinExist("")) 
+Capslock & w::         
+    If (id:=WinExist("WinSpy ahk_class AutoHotkeyGUI")) 
     {
-        WinRestore, ahk_id %id%
+        
         WinActivate, ahk_id %id%
     }
     else
         Run,%A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
 Return
+#If WinExist("Window Spy ahk_class AutoHotkeyGUI")
+    F12::ControlClick, Static1, Window Spy ahk_class AutoHotkeyGUI
+
+#If
 
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
