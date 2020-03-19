@@ -22,16 +22,12 @@ resizeStep=80 ;winresize
 playerExe:="Spotify\.exe"
 playerHWND=
 playerPath=%A_AppData%\Spotify\%playerExe%
-    playerWinTitle=ahk_exe %playerExe% 
-;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
-GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ 
+        
+playerWinTitle=ahk_exe %playerExe% 
+GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,(?:^.?$)|(?:^devtools) ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
     
-if (InStr(A_ComputerName, workHostname, false))
-    global browserExe="C:\vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
-else
-    global browserExe="C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
-
-global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"   
+global browserExe="C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
+global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
     global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
@@ -45,10 +41,9 @@ thm.Add("CapsLock", Func("sendMegaModifier"))
 ; it has to be after first capslock definitions
 
 ; these share same mouse mods+wheel actions
-;#Include %A_ScriptDir%\toggler.ahk
+#Include %A_ScriptDir%\toggler.ahk
 #Include %A_ScriptDir%\volControl.ahk                     
 #Include %A_ScriptDir%\winresize.ahk
-
 ^!WheelUp::   
     if resizeMode=0 
         Gosub, vol_MasterUp
@@ -65,8 +60,7 @@ Return
 !+WheelDown::Gosub vol_WaveDown
 ;so we have to deal with it here
 
-if (InStr(A_ComputerName, workHostname, false))
-    #Include %A_ScriptDir%\temp.ahk
+; 
 
 openLauncher(isHold, taps, state){
     global launcherMode
@@ -166,31 +160,22 @@ Return
 CapsLock & '::
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur false,,Hide
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
-Return
-
-CapsLock & p:: 
-    hwnd:=getCursorWindow()
-    hwnd:=SubStr(hwnd,3)
-    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 0 0 0,,Hide
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
 Return
 
 CapsLock & [:: 
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 ee000000 0,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 D6000000 0,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur true,,Hide
 Return
 
 CapsLock & ]:: 
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
-Return
-CapsLock & \::
-    hwnd:=getCursorWindow()
-    hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur true,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur false,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
 Return
 
 CapsLock & WheelDown:: 
@@ -289,7 +274,6 @@ Return
 !`::Send ``
 #If
     
-
 CapsLock & LWin:: 
     if (launcherMode = 0) {
         launcherMode := 1
@@ -309,7 +293,6 @@ Return
     KeyWait, LWin   
     If (InStr(A_PriorKey,"LWin"))
         Send {LAlt Down}{BackSpace}{LAlt Up}
-    
     
 Return    
 #If
