@@ -54,7 +54,7 @@ RegWrite, REG_DWORD, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion
 OutPutDebug, NoDispBackgroundPage: %ErrorLevel%
 RegWrite, REG_DWORD, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System, NoColorChoice, 00000000
 OutPutDebug, NoColorChoice: %ErrorLevel%
-RegDelete, REG_SZ, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System, Wallpaper
+RegDelete,  HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System, Wallpaper
 OutPutDebug, REMOVE Wallpaper: %ErrorLevel%
 RegWrite, REG_SZ, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System, WallpaperStyle
 OutPutDebug, REMOVE WallpaperStyle: %ErrorLevel%

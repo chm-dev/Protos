@@ -12,13 +12,6 @@ SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
-<<<<<<< HEAD
-global ClipSaved
-global cmderMode := 0
-global playerExe = "Spotify.exe"
-    workHostname=AGIL
-global playerHWND 
-=======
 ClipSaved=
 cmderMode=0
 launcherMode=0
@@ -28,7 +21,6 @@ resizeStep=80 ;winresize
 
 playerExe:="Spotify\.exe"
 playerHWND=
->>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
 playerPath=%A_AppData%\Spotify\%playerExe%
     playerWinTitle=ahk_exe %playerExe% 
 ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
@@ -42,32 +34,21 @@ else
 global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"   
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
-<<<<<<< HEAD
     global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
     global thm
-
-=======
-global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
-global thm
->>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
 #include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
-<<<<<<< HEAD
-    #Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
-#Include %A_ScriptDir%\winresize.ahk
-if (InStr(A_ComputerName, workHostname, false))
-    #Include %A_ScriptDir%\temp.ahk
-=======
-
+    
 ; it has to be after first capslock definitions
 
 ; these share same mouse mods+wheel actions
-#Include %A_ScriptDir%\toggler.ahk
+;#Include %A_ScriptDir%\toggler.ahk
 #Include %A_ScriptDir%\volControl.ahk                     
 #Include %A_ScriptDir%\winresize.ahk
+
 ^!WheelUp::   
     if resizeMode=0 
         Gosub, vol_MasterUp
@@ -84,8 +65,8 @@ Return
 !+WheelDown::Gosub vol_WaveDown
 ;so we have to deal with it here
 
-; 
->>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
+if (InStr(A_ComputerName, workHostname, false))
+    #Include %A_ScriptDir%\temp.ahk
 
 openLauncher(isHold, taps, state){
     global launcherMode
@@ -185,22 +166,25 @@ Return
 CapsLock & '::
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
-    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur false,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
 Return
 
 CapsLock & [:: 
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 D6000000 0,,Hide
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur true,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 ee000000 0,,Hide
 Return
 
 CapsLock & ]:: 
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur false,,Hide
-    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%   accent 0 0 0 0,,Hide
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
+Return
+CapsLock & \::
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd%  blur true,,Hide
 Return
 
 CapsLock & WheelDown:: 
@@ -283,7 +267,7 @@ NumpadDown:: Send {Media_Next}
 NumpadAdd:: Send {Volume_Up 4}
 NumpadSub:: Send {Volume_Down 4}
 
-CapsLock & LWin:: 
+CapsLock & LAlt:: 
     if (cmderMode = 0) {
         cmderMode := 1
         SoundPlay, %A_ScriptDir%\sounds\cmder_mode_on.mp3
@@ -298,12 +282,9 @@ Return
     `::!` 
 !`::Send ``
 #If
-<<<<<<< HEAD
     
-CapsLock & s:: 
-=======
 
-CapsLock & LAlt:: 
+CapsLock & LWin:: 
     if (launcherMode = 0) {
         launcherMode := 1
         SoundPlay, %A_ScriptDir%\sounds\launcher_mode_on.wav
@@ -322,24 +303,24 @@ Return
     KeyWait, LWin   
     If (InStr(A_PriorKey,"LWin"))
         Send {LAlt Down}{BackSpace}{LAlt Up}
->>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
+    
     
 Return    
 #If
 CapsLock & LCtrl:: 
-    if (resizemode = 0) {
-        resizemode := 1
-        SoundPlay, %A_ScriptDir%\sounds\resizemode_on.wav
-    }else {
-        resizemode := 0
-        SoundPlay, %A_ScriptDir%\sounds\resizemode_off.wav
-    }
-    Send {Blind}{CapsLock Up}
+if (resizemode = 0) {
+    resizemode := 1
+    SoundPlay, %A_ScriptDir%\sounds\resizemode_on.wav
+}else {
+    resizemode := 0
+    SoundPlay, %A_ScriptDir%\sounds\resizemode_off.wav
+}
+Send {Blind}{CapsLock Up}
 Return
 
 CapsLock & s::
     WinGet, num, Count, ahk_group SpotifyGrp
-    ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
+        ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
         OutputDebug, %ErrorLevel% 
     
@@ -469,7 +450,7 @@ Return
     F12::ControlClick, Static1, Window Spy ahk_class AutoHotkeyGUI
 
 #If
-
+    
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
