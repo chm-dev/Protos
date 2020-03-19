@@ -13,14 +13,14 @@ SetCapsLockState, AlwaysOff
 ; SetKeyDelay, -1, -1 ; Remove short delay done automatically after every keystroke sent by Send or ControlSend
 ; SetMouseDelay, -1 ; Remove short delay done automatically after Click and MouseMove/Click/Drag
 */
-resizeStep:=50
 
-!^WheelUp::
+win_enlarge:
     hwnd := "ahk_id " . getCursorWindow()   
     WinGet, ismax, MinMax, %hwnd%
     if (ismax = 1)
         Return      
     moveStep := resizeStep / 2
+    OutputDebug, ismax %ismax%, hwnd %hwnd%`nmovestep %moveStep% resizestep %resizeStep%
     WinGetPos, x,y,w,h,%hwnd%
     nw:=w+resizeStep
     nh:=h+resizeStep
@@ -29,7 +29,7 @@ resizeStep:=50
     WinMove,%hwnd%,,%nx%,%ny%,%nw%,%nh%
 return
 
-!^WheelDown::
+win_shrink:
     hwnd := "ahk_id " . getCursorWindow()   
     WinGet, ismax, MinMax, %hwnd%
     if (ismax = 1)
@@ -41,8 +41,6 @@ return
     nx:=x+moveStep
     ny:=y+moveStep
     WinMove,%hwnd%,,%nx%,%ny%,%nw%,%nh%    
-    
-    
 return
 
 ;WinMove, WinTitle, WinText, X, Y [, Width, Height, ExcludeTitle, ExcludeText]

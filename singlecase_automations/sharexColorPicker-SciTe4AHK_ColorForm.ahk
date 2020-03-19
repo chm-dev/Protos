@@ -6,7 +6,7 @@ SetTitleMatchMode, slow
 
 WindowTitle=ShareX - Color picker
 sxctrl=WindowsForms10.EDIT.app.0.36c601b_r6_ad ;15-13
-scictrl=Edit ;4-6
+    scictrl=Edit ;4-6
 
 !+v::
     ControlGetText, red, %sxctrl%15, %WindowTitle%
@@ -20,5 +20,5 @@ Return
 ^XButton1::ControlSend,,{Enter},%WindowTitle%
 
 #c::
-ControlClick,WindowsForms10.BUTTON.app.0.36c601b_r6_ad117, %WindowTitle%
-Return
+    aControlClick,WindowsForms10.BUTTON.app.0.36c601b_r6_ad117, %WindowTitle%
+        Return

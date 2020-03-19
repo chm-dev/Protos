@@ -12,11 +12,23 @@ SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
+<<<<<<< HEAD
 global ClipSaved
 global cmderMode := 0
 global playerExe = "Spotify.exe"
     workHostname=AGIL
 global playerHWND 
+=======
+ClipSaved=
+cmderMode=0
+launcherMode=0
+resizeMode=0
+
+resizeStep=80 ;winresize
+
+playerExe:="Spotify\.exe"
+playerHWND=
+>>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
 playerPath=%A_AppData%\Spotify\%playerExe%
     playerWinTitle=ahk_exe %playerExe% 
 ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
@@ -30,30 +42,64 @@ else
 global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"   
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
+<<<<<<< HEAD
     global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
     global thm
 
+=======
+global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
+global thm
+>>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
 #include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
+<<<<<<< HEAD
     #Include %A_ScriptDir%\toggler.ahk ; it has to be after first capslock definitions
 #Include %A_ScriptDir%\winresize.ahk
 if (InStr(A_ComputerName, workHostname, false))
     #Include %A_ScriptDir%\temp.ahk
+=======
+
+; it has to be after first capslock definitions
+
+; these share same mouse mods+wheel actions
+#Include %A_ScriptDir%\toggler.ahk
+#Include %A_ScriptDir%\volControl.ahk                     
+#Include %A_ScriptDir%\winresize.ahk
+^!WheelUp::   
+    if resizeMode=0 
+        Gosub, vol_MasterUp
+    else 
+        Gosub, win_enlarge 
+Return
+^!WheelDown::
+    if resizeMode=0 
+        Gosub, vol_MasterDown
+    else 
+        Gosub, win_shrink
+Return
+!+WheelUp::Gosub vol_WaveUp       ; Shift+Win+UpArrow
+!+WheelDown::Gosub vol_WaveDown
+;so we have to deal with it here
+
+; 
+>>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
 
 openLauncher(isHold, taps, state){
-    if (taps = 2 and GetKeyState("ScrollLock", "T")=0)
+    global launcherMode
+    if (taps = 2 and GetKeyState("ScrollLock", "T")=0 and launcherMode=0)
         Send {LAlt Down}{BackSpace}{LAlt Up}
-    Return
+Return
 }
 
 sendMegaModifier(isHold, taps, state){
     
     if (taps = 2 and state = 1 and GetKeyState("ScrollLock", "T")=0){
         OutputDebug entry: %isHold%, %taps%, %state%
-        Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}
+        Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}{CapsLock Up}
+        
         SoundPlay %A_ScriptDir%\sounds\toggle_on.wav
         ;SoundBeep 750, 300 
         KeyWait CapsLock, T1.4        
@@ -61,7 +107,7 @@ sendMegaModifier(isHold, taps, state){
             Send {Blind}{LCtrl Up}{LShift Up}{LAlt Up}
         SoundPlay %A_ScriptDir%\sounds\toggle_off.wav
     }   
-    Return 
+Return 
 }
 releaseAllModifiers() 
 { 
@@ -115,6 +161,13 @@ activateCursorWindow(){
     OutputDebug, % WinGetTitle, `% "ahk_id " . getCursorWindow()
     WinActivate, % "ahk_id " . getCursorWindow()
 }
+;=== BEGIN === 
+; == Debug ==
+CapsLock & r:: 
+    Reload
+Return
+
+; == Start of script ==
 
 CapsLock & LButton::
     WinUMID := getCursorWindow()
@@ -185,14 +238,6 @@ CapsLock & XButton2::
     Send #{Right}
 Return
 
-;AppsKey & l:: 
-;MsgBox l
-;Return
-
-CapsLock & r:: 
-    Reload
-Return
-
 ^!v:: 
     SendEvent {Raw}%Clipboard%
 Return 
@@ -212,8 +257,6 @@ CapsLock & v::
     }
 Return
 
-;^!WheelUp::Send ^!{WheelUp} ; Send {Volume_Up 3}
-;^!WheelDown:: Send +!{WheelDown}
 XButton1 & MButton:: 
 ^!MButton:: 
     Send {Volume_Mute}
@@ -248,31 +291,59 @@ CapsLock & LWin::
         cmderMode := 0
         SoundPlay, %A_ScriptDir%\sounds\cmder_mode_off.mp3
     }
+    Send {Blind}{CapsLock Up}
 Return
 
-#If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0
-    
-`:: 
-    Send {LAlt Down}``{LAlt Up}
-Return
-
+#If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0   
+    `::!` 
 !`::Send ``
-
-AppsKey:: LWin
-;$+#:: LWin
-;AppsKey:: LWin
 #If
+<<<<<<< HEAD
     
 CapsLock & s:: 
+=======
+
+CapsLock & LAlt:: 
+    if (launcherMode = 0) {
+        launcherMode := 1
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_on.wav
+    }else {
+        launcherMode := 0
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_off.wav
+    }
+    Send {CapsLock Up}
+Return
+
+#If launcherMode = 1 and GetKeyState("ScrollLock", "T") = 0
     
-    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
+;to understand what is going on with LWin here check #MenuMaskKey in ahk help
+~LWin::   
+    Send {Blind}{Ctrl}
+    KeyWait, LWin   
+    If (InStr(A_PriorKey,"LWin"))
+        Send {LAlt Down}{BackSpace}{LAlt Up}
+>>>>>>> 11438dcd0c2e6ecc9d9912fc20fe954bb2fa9476
+    
+Return    
+#If
+CapsLock & LCtrl:: 
+    if (resizemode = 0) {
+        resizemode := 1
+        SoundPlay, %A_ScriptDir%\sounds\resizemode_on.wav
+    }else {
+        resizemode := 0
+        SoundPlay, %A_ScriptDir%\sounds\resizemode_off.wav
+    }
+    Send {Blind}{CapsLock Up}
+Return
+
+CapsLock & s::
+    WinGet, num, Count, ahk_group SpotifyGrp
+    ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
         OutputDebug, %ErrorLevel% 
     
-    if (ErrorLevel){
-        
-        
-        
+    if (ErrorLevel){      
         grp := "ahk_group SpotifyGrp"
         WinGet, hwnd,ID, %grp%
         playerHWND = ahk_id %hwnd%
@@ -337,6 +408,7 @@ SendInput tomasz.chmielewski@alexmann.com
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+
 *Pause:: 
     Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}
     SetCapsLockState, Off
@@ -347,7 +419,6 @@ Return
 AppsKey & LButton:: 
     WinSet, Style, -0xC00000, A
 return
-;
 
 ;+Caption
 AppsKey & RButton:: 
@@ -371,10 +442,33 @@ CapsLock & t::
     WinWait, ahk_id %id%
     WinActivate 
     Sleep 200
-    Send {Blind}{Ctrl down}av{Ctrl up}
+    Send {Blind}{Ctrl down}v{Ctrl up}
 Return
+
+!^w:: 
+    If (id:=WinExist("Window Spy ahk_class AutoHotkeyGUI")) 
+    {
+        
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
+Return
+
 CapsLock & 0:: Run, %browserExe%%browserWebmaker%
-Capslock & w:: Run, %A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
+Capslock & w::         
+    If (id:=WinExist("WinSpy ahk_class AutoHotkeyGUI")) 
+    {
+        
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
+Return
+#If WinExist("Window Spy ahk_class AutoHotkeyGUI")
+    F12::ControlClick, Static1, Window Spy ahk_class AutoHotkeyGUI
+
+#If
 
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
