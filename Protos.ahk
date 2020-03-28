@@ -9,7 +9,7 @@ SendMode, Event
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 SetKeyDelay, 0
-SetCapsLockState, AlwaysOffęę
+SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 BlockInput, Send
 
