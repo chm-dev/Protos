@@ -1,5 +1,5 @@
 /* #SingleInstance, Force
-;#KeyHistory, 0
+    ;#KeyHistory, 0
 SetBatchLines, -1
 ;ListLines, Off
 SendMode Input ; Forces Send and SendRaw to use SendInput buffering for speed.
@@ -48,6 +48,10 @@ CapsLock & z::
     ResizeActiveWindow(0.6,0.6)
 Return    
 
+CapsLock & up::GetKeyState("Shi"+"ft") ? ResizeActiveWindow(0.4,0.3,"",0) : ResizeActiveWindow(1,0.4,0,0)
+
+Return
+
 GetMonitorAt(x, y, default=1) 
 { 
     SysGet,m, MonitorCount 
@@ -62,17 +66,31 @@ GetMonitorAt(x, y, default=1)
 return default
 }
 
-ResizeActiveWindow(scalex,scaley){ 
+ResizeActiveWindow( scalex, scaley, ux:="",uy:="",uw:="",uh:="")
+{ 
     WinGet, ismax, MinMax, A
+    WinGetPos, curX, curY, curW, curH, A
     if (ismax=1)
-        WinRestore, A
+        WinRestore, A    
     m:=WinMonitorInfo()
-    OutputDebug, % m
-    ww:=m["w"]*scalex
-    wh:=m["h"]*scaley
-    wx:= m["left"] + ((m["w"] - ww)/2)
-    wy:= m["top"] + ((m["h"] - wh)/2)
+    OutputDebug, %ux%,%uy%, %uw%, %uh%
+    OutputDebug, % StrLen(ux)
+    
+    ;if (RegExMatch(uw, "^(?:\+|\-)\d+$", out)) 
+    ;; TODO: dokonczyc + - `
+    
+    
+    ww:=StrLen(uw) = 0 ? m["w"]*scalex : uw
+    wh:=StrLen(uh) = 0 ? m["h"]*scaley : uh
+    ; if (SubStr(ww, StartingPos [, Length]))
+    wx:=StrLen(ux) = 0 ? m["left"] + ((m["w"] - ww)/2) : ux
+    wy:=StrLen(uy) = 0 ? m["top"] + ((m["h"] - wh)/2) : uy
+    OutputDebug, if %wx%=%ux% and %wy%=%uy% and (%ww%=uw or %ww%=m["w"]* %scalex%) and wh<=m["h"]*%scaley%
+        
+    OutputDebug, WinMove, A,, %wx%, %wy%, %ww%, %wh% 
     WinMove, A,, %wx%, %wy%, %ww%, %wh%
+    
+    
 Return
 }
 

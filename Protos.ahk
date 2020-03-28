@@ -1,6 +1,7 @@
-﻿#Persistent 
-#SingleInstance Force
-    #InstallKeybdHook
+﻿#SingleInstance Force
+    
+#Persistent 
+#InstallKeybdHook
 #InstallMouseHook
 DetectHiddenWindows, On
 SetTitleMatchMode, RegEx
@@ -8,11 +9,16 @@ SendMode, Event
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 SetKeyDelay, 0
-SetCapsLockState, AlwaysOff
+SetCapsLockState, AlwaysOffęę
 SetNumLockState, Off
+BlockInput, Send
+
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
+Menu, Tray, Add
+Menu, Tray, Add,Start &DropFocus, startDropFocus
+
 workHostname=AGIL
-ClipSaved=
+ClipSaved=`
 cmderMode=0
 launcherMode=0
 resizeMode=0
@@ -34,7 +40,8 @@ else
 global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"   
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
-    global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
+    global browserNotes= "https://y.chm.dev/laverna"
+global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
     global thm
 #include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
@@ -273,6 +280,9 @@ NumpadDown:: Send {Media_Next}
 NumpadAdd:: Send {Volume_Up 4}
 NumpadSub:: Send {Volume_Down 4}
 
+#v::SendEvent +!v
+#+v::SendEvent #v
+
 CapsLock & LAlt:: 
     if (cmderMode = 0) {
         cmderMode := 1
@@ -285,8 +295,9 @@ CapsLock & LAlt::
 Return
 
 #If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0   
-    `::!` 
+    `::!`   
 !`::Send ``
++`::~
 #If
     
 
@@ -328,15 +339,15 @@ CapsLock & s::
     WinGet, num, Count, ahk_group SpotifyGrp
         ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
-        OutputDebug, %ErrorLevel% 
+        
+    OutputDebug, %ErrorLevel% 
+    
     
     if (ErrorLevel){      
         grp := "ahk_group SpotifyGrp"
         WinGet, hwnd,ID, %grp%
         playerHWND = ahk_id %hwnd%
         OutputDebug, found hwnd %playerHWND%
-        
-        
         
         if (isWindowVisible(grp)){
             OutputDebug, is visible
@@ -358,6 +369,13 @@ CapsLock & s::
         Run, %A_AppData%\Spotify\Spotify.exe
         }  
 Return
+
+~F4 & ~RButton::
+    WinGet,pName, ProcessName, A
+    forcekill:=GetKeyState("Shift") ? "/F" : "F"
+        Run taskkill /IM %pName%,,Hide
+Return
+
 #If WinActive("ahk_group SpotifyGrp")
     ~Esc::WinHide, A
 #If
@@ -419,7 +437,9 @@ CapsLock & j::Run, %browserExe%%browserJoin%
 CapsLock & y::Run, %browserExe%%browserTranslate%
 CapsLock & t::
     releaseAllModifiers()
-        Send {Blind}{Ctrl down}c{Ctrl up}
+        
+    
+    Send {Blind}{Ctrl down}c{Ctrl up}
     id := WinExist("Mate Translate Unpinned")
     if (!id) {
         Run, %browserExe%%browserTranslate%
@@ -432,6 +452,16 @@ CapsLock & t::
     Send {Tab}
     Send ^a
     Send {Blind}%clipboard%
+Return
+CapsLock & n::
+    Run, %browserExe%%browserNotes%
+    if (GetKeyState("Shift")){
+        WinActivate, Laverna
+        WinWaitActive, Laverna
+        Send c
+        Sleep 150
+        SendPlay ^v
+    }
 Return
 
 !^w:: 
@@ -448,17 +478,15 @@ CapsLock & 0:: Run, %browserExe%%browserWebmaker%
 Capslock & w::         
     If (id:=WinExist("WinSpy ahk_class AutoHotkeyGUI")) 
     {
-        
+        if (WinActive("WinSpy ahk_class AutoHotkeyGUI")){
+            WinClose, A
+        }else 
         WinActivate, ahk_id %id%
     }
     else
         Run,%A_ScriptDir%\3rdParty\WinSpy.ahk   ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
 Return
-#If WinExist("Window Spy ahk_class AutoHotkeyGUI")
-    F12::ControlClick, Static1, Window Spy ahk_class AutoHotkeyGUI
 
-#If
-    
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
@@ -501,3 +529,5 @@ EWD_WatchMouse:
     EWD_MouseStartY := EWD_MouseY
 return
 
+startDropFocus:
+    Run, %A_ScriptDir%\dropFocus.ahk, %A_ScriptDir%, Min
