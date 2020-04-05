@@ -1,5 +1,4 @@
 
-
 #SingleInstance force
     #HotkeyInterval 1000        
 #MaxHotkeysPerInterval 100
@@ -173,38 +172,38 @@ TRA_ExitHandler:
 Return
 
 AOT_SetOn:
-	Gosub, AOT_CheckWinIDs
-	SetWinDelay, -1
-	IfWinNotExist, ahk_id %AOT_WinID%
-		Return
-	IfNotInString, AOT_WinIDs, |%AOT_WinID%
-		AOT_WinIDs = %AOT_WinIDs%|%AOT_WinID%
-	WinSet, AlwaysOnTop, On, ahk_id %AOT_WinID%
+    Gosub, AOT_CheckWinIDs
+    SetWinDelay, -1
+    IfWinNotExist, ahk_id %AOT_WinID%
+        Return
+    IfNotInString, AOT_WinIDs, |%AOT_WinID%
+        AOT_WinIDs = %AOT_WinIDs%|%AOT_WinID%
+    WinSet, AlwaysOnTop, On, ahk_id %AOT_WinID%
 Return
 
 AOT_SetOff:
-	Gosub, AOT_CheckWinIDs
-	SetWinDelay, -1
-	IfWinNotExist, ahk_id %AOT_WinID%
-		Return
-	StringReplace, AOT_WinIDs, AOT_WinIDs, |%A_LoopField%, , All
-	WinSet, AlwaysOnTop, Off, ahk_id %AOT_WinID%
+    Gosub, AOT_CheckWinIDs
+    SetWinDelay, -1
+    IfWinNotExist, ahk_id %AOT_WinID%
+        Return
+    StringReplace, AOT_WinIDs, AOT_WinIDs, |%A_LoopField%, , All
+        WinSet, AlwaysOnTop, Off, ahk_id %AOT_WinID%
 Return
 
 AOT_SetAllOff:
-	Gosub, AOT_CheckWinIDs
-	Loop, Parse, AOT_WinIDs, |
-		If ( A_LoopField )
-		{
-			AOT_WinID = %A_LoopField%
-			Gosub, AOT_SetOff
-		}
+    Gosub, AOT_CheckWinIDs
+    Loop, Parse, AOT_WinIDs, |
+        If ( A_LoopField )
+    {
+        AOT_WinID = %A_LoopField%
+            Gosub, AOT_SetOff
+    }
 Return
 
 AOT_CheckWinIDs:
-	DetectHiddenWindows, On
-	Loop, Parse, AOT_WinIDs, |
-		If ( A_LoopField )
-			IfWinNotExist, ahk_id %A_LoopField%
-				StringReplace, AOT_WinIDs, AOT_WinIDs, |%A_LoopField%, , All
-Return
+    DetectHiddenWindows, On
+    Loop, Parse, AOT_WinIDs, |
+        If ( A_LoopField )
+        IfWinNotExist, ahk_id %A_LoopField%
+        StringReplace, AOT_WinIDs, AOT_WinIDs, |%A_LoopField%, , All
+        Return
