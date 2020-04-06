@@ -1,4 +1,5 @@
-﻿; The percentage by which to raise or lower the volume each time:
+﻿global fsApp
+; The percentage by which to raise or lower the volume each time:
 vol_Step = 4
 
 ; How long to display the volume level bar graphs:
@@ -56,10 +57,6 @@ if vol_PosY >= 0
     vol_BarOptionsWave = %vol_BarOptionsWave% Y%vol_PosY_wave%
 }
 
-#SingleInstance
-SetBatchLines, 10ms
-Return
-
 ;___________________________________________ 
 
 vol_WaveUp: 
@@ -104,6 +101,13 @@ vol_MasterDown:
 return
 
 vol_ShowBars:
+    
+    curhwnd:=WinExist("A")
+    fs:=isWindowFullScreen(curhwnd)
+    OutputDebug,fs: %curhwnd%`n true: %fs%
+    If fs
+        Return
+    
     ; To prevent the "flashing" effect, only create the bar window if it
     ; doesn't already exist:
     IfWinNotExist, vol_Wave
@@ -156,3 +160,31 @@ getLevels(){
 Return    
 }
 
+isWindowFullScreen(WinID)
+{
+    ;checks if the specified window is full screen
+    ;code from NiftyWindows source
+    ;(with only slight modification)
+    
+    ;use WinExist of another means to get the Unique ID (HWND) of the desired window
+    
+    if ( !WinID )
+        return
+    
+    WinGet, WinMinMax, MinMax, ahk_id %WinID%
+    WinGetPos, WinX, WinY, WinW, WinH, ahk_id %WinID%
+    
+    if (WinMinMax = 0) && (WinX = 0) && (WinY = 0) && (WinW = A_ScreenWidth) && (WinH = A_ScreenHeight)
+    {
+        WinGetClass, WinClass, ahk_id %WinID%
+        WinGet, WinProcessName, ProcessName, ahk_id %WinID%
+        SplitPath, WinProcessName, , , WinProcessExt
+        
+        if (WinClass != "Progman") && (WinProcessExt != "scr")
+        {
+            ;program is full-screen
+            return true
+        }
+    }
+    OutputDebug, nie FS
+}

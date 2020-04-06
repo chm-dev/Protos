@@ -12,7 +12,7 @@
  *     OnWin( Event, WinTitle, Callback [, ItemId := "" ] )
  * Parameter(s):
  *     Event           [in] - Window event to monitor. Valid values are: Exist,
- *                            Close, Show, Hide, Active, NotActive, Minimize,
+ *                            , Show, Hide, Active, NotActive, Minimize,
  *                            Maximize.
  *     WinTitle        [in] - see http://ahkscript.org/docs/misc/WinTitle.htm
  *     Callback        [in] - "Function object" - see http://ahkscript.org/docs/objects/Functor.htm
