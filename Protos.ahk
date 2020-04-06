@@ -1,6 +1,6 @@
 ﻿#Persistent 
 #SingleInstance Force
-    #InstallKeybdHook
+#InstallKeybdHook
 #InstallMouseHook
 DetectHiddenWindows, On
 SetTitleMatchMode, RegEx
@@ -22,10 +22,10 @@ resizeStep=80 ;winresize
 playerExe:="Spotify\.exe"
 playerHWND=
 playerPath=%A_AppData%\Spotify\%playerExe%
-    playerWinTitle=ahk_exe %playerExe% 
+playerWinTitle=ahk_exe %playerExe% 
 ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,^.?$ 
-    
+
 if (InStr(A_ComputerName, workHostname, false))
     global browserExe="C:\vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
 else
@@ -34,14 +34,14 @@ else
 global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html"   
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
 global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options.html"
-    global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
-    global thm
+global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
+global thm
 #include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
 thm := new TapHoldManager(,,,"~")
 thm.Add("LAlt", Func("openLauncher"))
 thm.Add("CapsLock", Func("sendMegaModifier"))
-    
+
 ; it has to be after first capslock definitions
 
 ; these share same mouse mods+wheel actions
@@ -93,11 +93,11 @@ Return
 releaseAllModifiers() 
 { 
     list = Control|Alt|Shift 
-        Loop Parse, list, | 
+    Loop Parse, list, | 
     { 
         if (GetKeyState(A_LoopField)) 
             send {Blind}{%A_LoopField% up}       ; {Blind} is added.
-        } 
+    } 
 } 
 
 ~ScrollLock::
@@ -326,9 +326,9 @@ Return
 
 CapsLock & s::
     WinGet, num, Count, ahk_group SpotifyGrp
-        ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
+    ;    OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
-        OutputDebug, %ErrorLevel% 
+    OutputDebug, %ErrorLevel% 
     
     if (ErrorLevel){      
         grp := "ahk_group SpotifyGrp"
@@ -356,7 +356,7 @@ CapsLock & s::
     }else{
         OutputDebug  not running, start
         Run, %A_AppData%\Spotify\Spotify.exe
-        }  
+    }  
 Return
 #If WinActive("ahk_group SpotifyGrp")
     ~Esc::WinHide, A
@@ -419,7 +419,7 @@ CapsLock & j::Run, %browserExe%%browserJoin%
 CapsLock & y::Run, %browserExe%%browserTranslate%
 CapsLock & t::
     releaseAllModifiers()
-        Send {Blind}{Ctrl down}c{Ctrl up}
+    Send {Blind}{Ctrl down}c{Ctrl up}
     id := WinExist("Mate Translate Unpinned")
     if (!id) {
         Run, %browserExe%%browserTranslate%
