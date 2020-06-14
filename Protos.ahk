@@ -1,8 +1,9 @@
 ﻿#SingleInstance Force
-
 #Persistent 
 #InstallKeybdHook
 #InstallMouseHook
+#MenuMaskKey LShift
+
 DetectHiddenWindows, On
 SetTitleMatchMode, RegEx
 SendMode, Event
@@ -12,14 +13,25 @@ SetKeyDelay, 0
 SetCapsLockState, AlwaysOff
 SetNumLockState, Off
 BlockInput, Send
-
+CoordMode, Mouse
+Menu, Tray, NoStandard
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
-Menu, Tray, Add
 Menu, Tray, Add,Start &OpacityHelper, startOpacityHelper
 Menu, Tray, Add,Start &DropFocus, startDropFocus
+Menu, Tray, Add,Start &Slide, startSlide
+Menu, Tray, Add
+Menu, Tray, Standard
+dhw := A_DetectHiddenWindows
+DetectHiddenWindows On
+
+Run "%ComSpec%" /k,, Hide, pid
+while !(hConsole := WinExist("ahk_pid" pid))
+    Sleep 10
+DllCall("AttachConsole", "UInt", pid)
+DetectHiddenWindows %dhw%
 
 workHostname=AGIL
-ClipSaved=`
+ClipSaved= ; this is not used ???
 cmderMode=0
 launcherMode=0
 resizeMode=0
@@ -27,8 +39,12 @@ resizeMode=0
 resizeStep=80 ;winresize
 
 playerExe:="Spotify\.exe"
-playerHWND=
+playerHWND= ; this is not used ??
 playerPath=%A_AppData%\Spotify\%playerExe%
+sptPath:="C:\Users\chm\scoop\shims\spt.exe"
+sptHWND=
+sptScale:=0.65
+blur=%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe
 
 playerWinTitle=ahk_exe %playerExe% 
 GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,(?:^.?$)|(?:^devtools) ;global window group holding ... only main window thanks to regex .. it is totally stupid and should be changed ;)
@@ -53,22 +69,24 @@ thm.Add("CapsLock", Func("sendMegaModifier"))
 ; it has to be after first capslock definitions
 
 ; these share same mouse mods+wheel actions
-#Include %A_ScriptDir%\toggler.ahk
+; #Include %A_ScriptDir%\toggler.ahk
 #Include %A_ScriptDir%\volControl.ahk 
 #Include %A_ScriptDir%\winresize.ahk
 
-^!WheelUp:: 
-if resizeMode=0 
-    Gosub, vol_MasterUp
-else 
-    Gosub, win_enlarge 
+^!WheelUp::
+    Gosub, vol_MasterUp 
 Return
 ^!WheelDown::
-    if resizeMode=0 
-        Gosub, vol_MasterDown
-    else 
-        Gosub, win_shrink
+    Gosub, vol_MasterDown
 Return
+
+^+WheelUp::
+    Gosub, win_enlarge 
+Return
+^+WheelDown::
+    Gosub, win_shrink 
+Return
+
 !+WheelUp::Gosub vol_WaveUp ; Shift+Win+UpArrow
 !+WheelDown::Gosub vol_WaveDown
 ;so we have to deal with it here
@@ -171,6 +189,8 @@ CapsLock & LButton::
     }
 Return
 
+CapsLock & Escape:: Suspend
+
 CapsLock & '::
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
@@ -198,7 +218,7 @@ Return
 CapsLock & \::
     hwnd:=getCursorWindow()
     hwnd:=SubStr(hwnd,3)
-    Run, %A_ScriptDir%\3rdParty\SetWindowCom````positionAttribute.exe hwnd %hwnd% blur true,,Hide
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% blur true,,Hide
 Return
 
 CapsLock & WheelDown:: 
@@ -237,8 +257,11 @@ Send #{Right}
 
 Return
 
-^!v:: 
-SendEvent {Raw}%Clipboard%
+LCtrl & XButton1::Send ^!{Left}
+LCtrl & XButton2::Send ^!{Right}
+
+^!v::
+    SendEvent {Raw}%Clipboard%
 Return 
 
 CapsLock & v:: 
@@ -254,6 +277,10 @@ if (InStr(Clipboard, "document.query") = 0){
     
     SendEvent "%SendStr%"
 }
+Return
+
++!Ins::
+    SendRaw % StrReplace(RunWaitOne("D:\cygwin64\bin\cygpath.exe " . Clipboard),"`n", "")
 Return
 
 XButton1 & MButton:: 
@@ -322,30 +349,51 @@ Return
     
 ;to understand what is going on with LWin here check #MenuMaskKey in ahk help
 ~LWin:: 
-Send {Blind}{Ctrl}
+Send {Blind}{LShift}
 KeyWait, LWin 
 If (InStr(A_PriorKey,"LWin"))
     Send {LAlt Down}{BackSpace}{LAlt Up}
 
 Return 
 #If
-    CapsLock & LCtrl:: 
-if (resizemode = 0) {
-    resizemode := 1
-    SoundPlay, %A_ScriptDir%\sounds\resizemode_on.wav
-}else {
-    resizemode := 0
-    SoundPlay, %A_ScriptDir%\sounds\resizemode_off.wav
-}
-Send {Blind}{CapsLock Up}
+    
+
+Capslock & d::
+    AA_DetectHiddenWindows := A_DetectHiddenWindows 
+    DetectHiddenWindows, On
+    WindowTitle = ahk_id %sptHWND%
+    if (WinExist(WindowTitle)){
+        mm:=MouseMonitorInfo() ; we will use to put the window on monitor where mouse is
+        if (isWindowVisible(WindowTitle)){
+            OutputDebug, is visible
+            If (WinActive(WindowTitle)){
+                OutputDebug, is active, WinHide
+                WinHide, %WindowTitle% 
+            } Else {
+                OutputDebug, not active so restoring, just in case and activating
+                WinRestore, %WindowTitle%
+                ;move to mouse monitor
+                Gosub SptPositionSet
+                WinActivate, %WindowTitle% 
+            }
+        }else {
+            OutputDebug, is not visible - showing
+            WinShow, %WindowTitle%
+            Gosub SptPositionSet
+            WinActivate, %WindowTitle% 
+        }
+    }else{
+        OutputDebug not running, start
+        Gosub StartSpt
+    } 
 Return
 
 CapsLock & s::
-    WinGet, num, Count, ahk_group SpotifyGrp
+    ; WinGet, num, Count, ahk_group SpotifyGrp
     ; OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
     
-    OutputDebug, %ErrorLevel% 
+    ;OutputDebug, %ErrorLevel% 
     
     
     if (ErrorLevel){ 
@@ -381,7 +429,7 @@ Return
     Run taskkill /IM %pName%,,Hide
 Return
 
-#If WinActive("ahk_group SpotifyGrp")
+#If WinActive("ahk_group SpotifyGrp") or WinActive("ahk_id " sptHWND)
     ~Esc::WinHide, A
 #If
     
@@ -420,18 +468,18 @@ Return
 ;---------- EXPERIMENTS BELOW ---------------------------
 
 *Pause:: 
-Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}
+Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}{XButton1 Up}{XButton2 Up}
 SetCapsLockState, Off
 SetCapsLockState, AlwaysOff
 SoundPlay %A_ScriptDir%\sounds\release_all.mp3
 Return
 
-AppsKey & LButton:: 
+~AppsKey & LButton:: 
 WinSet, Style, -0xC00000, A
 return
 
 ;+Caption
-AppsKey & RButton:: 
+~AppsKey & RButton:: 
 WinSet, Style, +0xC00000, A
 return
 ;
@@ -492,6 +540,22 @@ else
     Run,%A_ScriptDir%\3rdParty\WinSpy.ahk ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
 Return
 
+~RCtrl & AppsKey::
+    wt=ahk_class NotifyIconOverflowWindow
+    MouseGetPos,x,y
+    WinMove,%wt%,,%x%, %y%
+    WinShow, %wt%
+Return
+
+#If WinActive("ahk_class NotifyIconOverflowWindow") or isWindowVisible("ahk_class NotifyIconOverflowWindow")
+    
+
+~RCtrl & AppsKey::
+~Esc::
+    WinHide, ahk_class NotifyIconOverflowWindow
+Return
+#If
+    
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
@@ -507,6 +571,14 @@ return
 
 #If
     
+#F1::
+    Process, Exist, DMT.exe
+    If (ErrorLevel)
+        SendEvent, {LWin Down}{LAlt Down}{F1}{LWin Up}{LAlt Up}
+    Else 
+        Send {LWin Down}{F1}{LWin Up}
+Return
+
 EWD_WatchMouse: 
 GetKeyState, EWD_LButtonState, LButton, P
 if EWD_LButtonState = U ; Button has been relseased, so drag is complete.
@@ -540,3 +612,44 @@ Return
 startOpacityHelper:
     Run, %A_ScriptDir%\automations\opacityDebugHelper.ahk, %A_ScriptDir%, Min
 Return
+startSlide:
+    Run, %A_ScriptDir%\inProgress\Slide.ahk, %A_ScriptDir%\inProgress\, Min
+Return
+
+StartSpt:
+    Run,%sptPath%,,Min,sptPID
+    WinWait, ahk_pid %sptPID%
+    WinGet, sptHWND, ID, ahk_pid %sptPID%
+    blurhwnd:=SubStr(sptHWND,3) 
+    WinSet, Style, 0x90000000, ahk_id %sptHWND%
+    RunWait, %blur% hwnd %blurhwnd% accent 3 2 99000000 0
+    WinRestore, ahk_id %sptHWND%
+    Gosub SptPositionSet
+    ;WinSet, Region, w%w% h%h% R, ahk_id %sptHWND%
+    OnWin("NotActive", ahk_id %sptHWND%, Func("hideSPT"))
+Return
+
+SptPositionSet:
+    mm:=MouseMonitorInfo()
+    w := Floor(mm["w"] * sptScale)
+    h := Floor(w/2) ; Floor(A_ScreenHeight * 0.75)
+    x := Floor((A_ScreenWidth - w) / 2 )+ Floor(mm["left"])
+    y := Floor((A_ScreenHeight - h) / 2 )+ Floor(mm["top"])
+    WinMove, ahk_id %sptHWND%,, %x%, %y%, %w%, %h%
+    OutputDebug WinMove, ahk_id %sptHWND%,, %x%, %y%, %w%, %h% 
+Return
+
+hideSPT(){
+    WinHide, ahk_id %sptHWND%
+Return
+}
+
+RunWaitOne(command) {
+    ; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99¬
+    shell := ComObjCreate("WScript.Shell")
+    ; Execute a single command via cmd.exe
+    exec := shell.Exec(ComSpec " /C " command)
+    ; Read and return the command's output
+return exec.StdOut.ReadAll()
+}
+
