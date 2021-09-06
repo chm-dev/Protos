@@ -4,6 +4,9 @@
 #InstallMouseHook
 #MenuMaskKey LShift
 
+SoundPlay, %A_ScriptDir%\sounds\protos_active.mp3
+Sleep 1500
+
 DetectHiddenWindows, On
 SetTitleMatchMode, RegEx
 SendMode, Event
@@ -17,8 +20,9 @@ CoordMode, Mouse
 Menu, Tray, NoStandard
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 Menu, Tray, Add,Start &OpacityHelper, startOpacityHelper
-Menu, Tray, Add,Start &DropFocus, startDropFocus
-Menu, Tray, Add,Start &Slide, startSlide
+Menu, Tray, Add,Start W_RMB &Swapper, startWRMB
+Menu, Tray, Add,Start &GameMode, startGameMode
+
 Menu, Tray, Add
 Menu, Tray, Standard
 dhw := A_DetectHiddenWindows
@@ -60,11 +64,11 @@ global browserREPL= "chrome-extension://ojmdmeehmpkpkkhbifimekflgmnmeihg/options
 global browserNotes= "https://y.chm.dev/laverna"
 global browserJOIN = "chrome-extension://flejfacjooompmliegamfbpjjdlhokhj/devices.html?tab=notifications&popup=1"
 global thm
-#include %A_ScriptDir%\Lib\TapHoldManager.ahk
+;#include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ; TapTime / Prefix can now be set here
-thm := new TapHoldManager(,,,"~")
-thm.Add("LAlt", Func("openLauncher"))
-thm.Add("CapsLock", Func("sendMegaModifier"))
+;thm := new TapHoldManager(,,,"~")
+;thm.Add("LAlt", Func("openLauncher"))
+;rthm.Add("CapsLock", Func("sendMegaModifier"))
 
 ; it has to be after first capslock definitions
 
@@ -102,11 +106,11 @@ Return
 }
 
 sendMegaModifier(isHold, taps, state){
-    
+
     if (taps = 2 and state = 1 and GetKeyState("ScrollLock", "T")=0){
         OutputDebug entry: %isHold%, %taps%, %state%
         Send {Blind}{LCtrl Down}{LShift Down}{LAlt Down}{CapsLock Up}
-        
+
         SoundPlay %A_ScriptDir%\sounds\toggle_on.wav
         ;SoundBeep 750, 300 
         KeyWait CapsLock, T1.4 
@@ -125,22 +129,6 @@ releaseAllModifiers()
             send {Blind}{%A_LoopField% up} ; {Blind} is added.
     } 
 } 
-
-~ScrollLock::
-    If (GetKeyState("ScrollLock", "T") = 1)
-    {
-        Menu, Tray, Icon, %A_ScriptDir%\protos_off.png, 1
-        SoundPlay, %A_ScriptDir%\sounds\protos_off.mp3 
-    }
-    Else {
-        Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
-        SoundPlay, %A_ScriptDir%\sounds\protos_on.mp3
-    }
-    
-Return
-
-#If, GetKeyState("ScrollLock", "T") = 0 ;only if scrolllock is off
-    Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
 
 isWindowVisible(WTitle){
     if not DllCall("IsWindowVisible", "UInt", WinExist(WTitle)){
@@ -171,7 +159,7 @@ activateCursorWindow(){
 ;=== BEGIN === 
 ; == Debug ==
 CapsLock & r:: 
-Reload
+    Reload
 Return
 
 ; == Start of script ==
@@ -189,7 +177,29 @@ CapsLock & LButton::
     }
 Return
 
-CapsLock & Escape:: Suspend
+~Home & PgUp:: 
+    Suspend, Permit
+    if (A_IsSuspended = 1) 
+    {
+        SoundPlay, %A_ScriptDir%\sounds\protos_active.mp3
+        Sleep 1200
+        SetCapsLockState, AlwaysOff
+        Suspend, Off
+    }
+Return
+
+~Home & PgDn:: 
+    SoundPlay, %A_ScriptDir%\sounds\protos_suspended.mp3
+    Sleep 1200
+    SetCapsLockState, Off
+    Suspend, On
+Return
+
+^!+End:: 
+    SoundPlay, %A_ScriptDir%\sounds\protos_exiting.mp3
+    Sleep 1800 
+ExitApp
+Return
 
 CapsLock & '::
     hwnd:=getCursorWindow()
@@ -199,21 +209,21 @@ CapsLock & '::
 Return
 
 CapsLock & p:: 
-hwnd:=getCursorWindow()
-hwnd:=SubStr(hwnd,3)
-Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 0 0 0,,Hide
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 0 0 0,,Hide
 Return
 
 CapsLock & [:: 
-hwnd:=getCursorWindow()
-hwnd:=SubStr(hwnd,3)
-Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 ee000000 0,,Hide
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run, %A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 ee000000 0,,Hide
 Return
 
 CapsLock & ]:: 
-hwnd:=getCursorWindow()
-hwnd:=SubStr(hwnd,3)
-Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
+    hwnd:=getCursorWindow()
+    hwnd:=SubStr(hwnd,3)
+    Run,%A_ScriptDir%\3rdParty\SetWindowCompositionAttribute.exe hwnd %hwnd% accent 3 2 e619140c 0,,Hide
 Return
 CapsLock & \::
     hwnd:=getCursorWindow()
@@ -222,38 +232,38 @@ CapsLock & \::
 Return
 
 CapsLock & WheelDown:: 
-WinUMID := getCursorWindow()
-if WinUMID = -1
-Return 
-WinMinimize ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1
+        Return 
+    WinMinimize ahk_id %WinUMID%
 Return
 
 CapsLock & WheelUp:: 
-WinUMID := getCursorWindow()
-if WinUMID = -1
-Return 
-WinMaximize ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1
+        Return 
+    WinMaximize ahk_id %WinUMID%
 Return
 
 CapsLock & MButton:: 
-WinUMID := getCursorWindow()
-if WinUMID = -1
-Return 
-WinRestore ahk_id %WinUMID%
+    WinUMID := getCursorWindow()
+    if WinUMID = -1
+        Return 
+    WinRestore ahk_id %WinUMID%
 Return
 
 CapsLock & XButton1::
     if (!GetKeyState("Shift"))
         activateCursorWindow()
-    
+
     Send #{Left}
 Return
 
 CapsLock & XButton2:: 
-if (!GetKeyState("Shift"))
-    activateCursorWindow()
+    if (!GetKeyState("Shift"))
+        activateCursorWindow()
 
-Send #{Right}
+    Send #{Right}
 
 Return
 
@@ -265,18 +275,18 @@ LCtrl & XButton2::Send ^!{Right}
 Return 
 
 CapsLock & v:: 
-if (InStr(Clipboard, "document.query") = 0){
-    
-    SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
-    SendStr := StrReplace(SendStr, """""", """",,-1)
-    ;MsgBox, %Clipboard%, %SendStr%
-    SendEvent {Raw} document.querySelector('%SendStr%')
-} Else {
-    SendStr := StrReplace(Clipboard, """", """""")
-    SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
-    
-    SendEvent "%SendStr%"
-}
+    if (InStr(Clipboard, "document.query") = 0){
+
+        SendStr := RegExReplace(Clipboard, "^""(.+)""$", "$1")
+        SendStr := StrReplace(SendStr, """""", """",,-1)
+        ;MsgBox, %Clipboard%, %SendStr%
+        SendEvent {Raw} document.querySelector('%SendStr%')
+    } Else {
+        SendStr := StrReplace(Clipboard, """", """""")
+        SendStr := RegExReplace(SendStr, "document\.querySelector(?:All)?\('?([^\(\)]*)'\)", "$1")
+
+        SendEvent "%SendStr%"
+    }
 Return
 
 +!Ins::
@@ -285,7 +295,7 @@ Return
 
 XButton1 & MButton:: 
 ^!MButton:: 
-Send {Volume_Mute}
+    Send {Volume_Mute}
 Return
 XButton1:: Return
 XButton2:: Return
@@ -305,7 +315,7 @@ Return
 Return
 +!MButton:: 
 NumpadIns:: 
-Send {Media_Play_Pause}
+    Send {Media_Play_Pause}
 Return 
 NumpadDel:: Send {Media_Stop}
 NumpadEnd:: Send {Media_Prev}
@@ -317,14 +327,14 @@ NumpadSub:: Send {Volume_Down 4}
 #+v::SendEvent #v
 
 CapsLock & LAlt:: 
-if (cmderMode = 0) {
-    cmderMode := 1
-    SoundPlay, %A_ScriptDir%\sounds\cmder_mode_on.mp3
-}else {
-    cmderMode := 0
-    SoundPlay, %A_ScriptDir%\sounds\cmder_mode_off.mp3
-}
-Send {Blind}{CapsLock Up}
+    if (cmderMode = 0) {
+        cmderMode := 1
+        SoundPlay, %A_ScriptDir%\sounds\cmder_mode_on.mp3
+    }else {
+        cmderMode := 0
+        SoundPlay, %A_ScriptDir%\sounds\cmder_mode_off.mp3
+    }
+    Send {Blind}{CapsLock Up}
 Return
 
 #If cmderMode = 1 and GetKeyState("ScrollLock", "T") = 0 
@@ -332,31 +342,29 @@ Return
 !`::Send ``
 +`::~
 #If
-    
 
 CapsLock & LWin:: 
-if (launcherMode = 0) {
-    launcherMode := 1
-    SoundPlay, %A_ScriptDir%\sounds\launcher_mode_on.wav
-}else {
-    launcherMode := 0
-    SoundPlay, %A_ScriptDir%\sounds\launcher_mode_off.wav
-}
-Send {CapsLock Up}
+    if (launcherMode = 0) {
+        launcherMode := 1
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_on.wav
+    }else {
+        launcherMode := 0
+        SoundPlay, %A_ScriptDir%\sounds\launcher_mode_off.wav
+    }
+    Send {CapsLock Up}
 Return
 
 #If launcherMode = 1 and GetKeyState("ScrollLock", "T") = 0
-    
+
 ;to understand what is going on with LWin here check #MenuMaskKey in ahk help
 ~LWin:: 
-Send {Blind}{LShift}
-KeyWait, LWin 
-If (InStr(A_PriorKey,"LWin"))
-    Send {LAlt Down}{BackSpace}{LAlt Up}
+    Send {Blind}{LShift}
+    KeyWait, LWin 
+    If (InStr(A_PriorKey,"LWin"))
+        Send {LAlt Down}{BackSpace}{LAlt Up}
 
 Return 
 #If
-    
 
 Capslock & d::
     AA_DetectHiddenWindows := A_DetectHiddenWindows 
@@ -392,95 +400,105 @@ CapsLock & s::
     ; WinGet, num, Count, ahk_group SpotifyGrp
     ; OutputDebug, %A_TitleMatchMode%, HiddenWIndows %A_DetectHiddenWindows%
     Process, Exist, Spotify.exe
-    
+
     ;OutputDebug, %ErrorLevel% 
-    
-    
+
     if (ErrorLevel){ 
-        grp := "ahk_group SpotifyGrp"
-        WinGet, hwnd,ID, %grp%
-        playerHWND = ahk_id %hwnd%
-        OutputDebug, found hwnd %playerHWND%
-        
-        if (isWindowVisible(grp)){
+        sWinTitle := "(?:Spotify Premium)|(?:[^\s]+\s-\s[^\s]+).* ahk_exe Spotify.exe"
+
+        if (isWindowVisible(sWinTitle)){
             OutputDebug, is visible
-            If (WinActive(grp)){
+            If (WinActive(sWinTitle)){
                 OutputDebug, is active, WinHide
-                WinHide, %grp% 
+                WinHide, %sWinTitle% 
             } Else {
                 OutputDebug, not active so restoring, just in case and activating
-                WinRestore, %grp%
-                WinActivate, %grp% 
+                WinRestore, %sWinTitle%
+                WinActivate, %sWinTitle% 
             }
         }else {
             OutputDebug, is not visible - showing
-            WinShow, %grp%
-            WinActivate, %grp% 
+            WinShow, %sWinTitle%
+            WinActivate, %sWinTitle% 
         }
     }else{
         OutputDebug not running, start
-        Run, %A_AppData%\Spotify\Spotify.exe
+        Run, Spotify.exe
     } 
 Return
 
 ~F4 & ~RButton::
     WinGet,pName, ProcessName, A
-    forcekill:=GetKeyState("Shift") ? "/F" : "F"
+forcekill:=GetKeyState("Shift") ? "/F" : "F"
     Run taskkill /IM %pName%,,Hide
 Return
 
 #If WinActive("ahk_group SpotifyGrp") or WinActive("ahk_id " sptHWND)
     ~Esc::WinHide, A
 #If
-    
+
 #If WinActive("ahk_exe dopus.exe")
     MButton::Send {Enter}
 #If
-    
+
 ::dqs:: 
-SendInput document.querySelector(''){Left 2}
+    SendInput document.querySelector(''){Left 2}
 Return
 
 ::dqsa:: 
-SendInput document.querySelectorAll(''){Left 2}
+    SendInput document.querySelectorAll(''){Left 2}
 Return
 
 ::ses:: 
-SendInput [sessionId]
+    SendInput [sessionId]
 Return
 
 ::rcv:: 
-SendInput rcon callvote 
+    SendInput rcon callvote 
 Return
 
 ::cq3:: 
-SendInput connect q3.click
+    SendInput connect q3.click
 Return
 
 ::@gm:: 
-SendInput chmielciu@gmail.com
+    SendInput chmielciu@gmail.com
 Return
 
 ::@al:: 
-SendInput tomasz.chmielewski@alexmann.com 
+    SendInput tomasz.chmielewski@alexmann.com 
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+CapsLock & BackSpace::
+LWin & BackSpace:: 
+    Suspend, Permit
+    if (A_IsSuspended){
+        Run, explorer.exe
+        Suspend, Off
+        SoundPlay %A_ScriptDir%\sounds\game_mode_off.mp3
+    }
+    Else{
+        Run, taskkill /IM explorer.exe /F
+        Suspend, On
+        SoundPlay %A_ScriptDir%\sounds\game_mode_on.mp3
+    }
+Return
 
 *Pause:: 
-Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}{XButton1 Up}{XButton2 Up}
-SetCapsLockState, Off
-SetCapsLockState, AlwaysOff
-SoundPlay %A_ScriptDir%\sounds\release_all.mp3
+    Send {Alt Up}{Ctrl Up}{Shift Up}{LWin Up}{CapsLock Up}{XButton1 Up}{XButton2 Up}
+    SetCapsLockState, Off
+    SetCapsLockState, AlwaysOff
+    SoundPlay %A_ScriptDir%\sounds\release_all.mp3
 Return
 
 ~AppsKey & LButton:: 
-WinSet, Style, -0xC00000, A
+    WinSet, Style, -0xC00000, A
 return
 
 ;+Caption
 ~AppsKey & RButton:: 
-WinSet, Style, +0xC00000, A
+    WinSet, Style, +0xC00000, A
 return
 ;
 
@@ -490,8 +508,7 @@ CapsLock & j::Run, %browserExe%%browserJoin%
 CapsLock & y::Run, %browserExe%%browserTranslate%
 CapsLock & t::
     releaseAllModifiers()
-    
-    
+
     Send {Blind}{Ctrl down}c{Ctrl up}
     id := WinExist("Mate Translate Unpinned")
     if (!id) {
@@ -518,26 +535,26 @@ CapsLock & n::
 Return
 
 !^w:: 
-If (id:=WinExist("Window Spy ahk_class AutoHotkeyGUI")) 
-{
-    
-    WinActivate, ahk_id %id%
-}
-else
-    Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
+    If (id:=WinExist("Window Spy ahk_class AutoHotkeyGUI")) 
+    {
+
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WindowSpy.ahk
 Return
 
 CapsLock & 0:: Run, %browserExe%%browserWebmaker%
 Capslock & w:: 
-If (id:=WinExist("WinSpy ahk_class AutoHotkeyGUI")) 
-{
-    if (WinActive("WinSpy ahk_class AutoHotkeyGUI")){
-        WinClose, A
-    }else 
-    WinActivate, ahk_id %id%
-}
-else
-    Run,%A_ScriptDir%\3rdParty\WinSpy.ahk ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
+    If (id:=WinExist("WinSpy ahk_class AutoHotkeyGUI")) 
+    {
+        if (WinActive("WinSpy ahk_class AutoHotkeyGUI")){
+            WinClose, A
+        }else 
+        WinActivate, ahk_id %id%
+    }
+    else
+        Run,%A_ScriptDir%\3rdParty\WinSpy.ahk ; "C:\Dev\AHK\AHK\WindowSpy.ahk"
 Return
 
 ~RCtrl & AppsKey::
@@ -548,29 +565,28 @@ Return
 Return
 
 #If WinActive("ahk_class NotifyIconOverflowWindow") or isWindowVisible("ahk_class NotifyIconOverflowWindow")
-    
 
 ~RCtrl & AppsKey::
 ~Esc::
     WinHide, ahk_class NotifyIconOverflowWindow
 Return
 #If
-    
+
 #If WinActive("Mate Translate Unpinned")
     ~Esc:: WinClose, A
 #If
-    
+
 ~Alt & LButton:: 
-CoordMode, Mouse ; Switch to screen/absolute coordinates.
-MouseGetPos, EWD_MouseStartX, EWD_MouseStartY, EWD_MouseWin
-WinGetPos, EWD_OriginalPosX, EWD_OriginalPosY,,, ahk_id %EWD_MouseWin%
-WinGet, EWD_WinState, MinMax, ahk_id %EWD_MouseWin%
-if EWD_WinState = 0 ; Only if the window isn't maximized
-    SetTimer, EWD_WatchMouse, 10 ; Track the mouse as the user drags it.
+    CoordMode, Mouse ; Switch to screen/absolute coordinates.
+    MouseGetPos, EWD_MouseStartX, EWD_MouseStartY, EWD_MouseWin
+    WinGetPos, EWD_OriginalPosX, EWD_OriginalPosY,,, ahk_id %EWD_MouseWin%
+    WinGet, EWD_WinState, MinMax, ahk_id %EWD_MouseWin%
+    if EWD_WinState = 0 ; Only if the window isn't maximized
+        SetTimer, EWD_WatchMouse, 10 ; Track the mouse as the user drags it.
 return
 
 #If
-    
+
 #F1::
     Process, Exist, DMT.exe
     If (ErrorLevel)
@@ -580,40 +596,40 @@ return
 Return
 
 EWD_WatchMouse: 
-GetKeyState, EWD_LButtonState, LButton, P
-if EWD_LButtonState = U ; Button has been relseased, so drag is complete.
-{
-    SetTimer, EWD_WatchMouse, off
-return
-}
+    GetKeyState, EWD_LButtonState, LButton, P
+    if EWD_LButtonState = U ; Button has been relseased, so drag is complete.
+    {
+        SetTimer, EWD_WatchMouse, off
+        return
+    }
 
-GetKeyState, EWD_EscapeState, Escape, P
-if EWD_EscapeState = D ; Escape has been pressed, so drag is cancelled.
-{
-    SetTimer, EWD_WatchMouse, off
-    WinMove, ahk_id %EWD_MouseWin%,, %EWD_OriginalPosX%, %EWD_OriginalPosY%
-return
-}
+    GetKeyState, EWD_EscapeState, Escape, P
+    if EWD_EscapeState = D ; Escape has been pressed, so drag is cancelled.
+    {
+        SetTimer, EWD_WatchMouse, off
+        WinMove, ahk_id %EWD_MouseWin%,, %EWD_OriginalPosX%, %EWD_OriginalPosY%
+        return
+    }
 
-; Otherwise, reposition the window to match the change in mouse coordinates
-; caused by the user having dragged the mouse: 
-CoordMode, Mouse
-MouseGetPos, EWD_MouseX, EWD_MouseY
-WinGetPos, EWD_WinX, EWD_WinY,,, ahk_id %EWD_MouseWin%
-SetWinDelay, -1 ; Makes the below move faster/smoother.
-WinMove, ahk_id %EWD_MouseWin%,, EWD_WinX + EWD_MouseX - EWD_MouseStartX, EWD_WinY + EWD_MouseY - EWD_MouseStartY
-EWD_MouseStartX := EWD_MouseX ; Update for the next timer-call to this subroutine.
-EWD_MouseStartY := EWD_MouseY
+    ; Otherwise, reposition the window to match the change in mouse coordinates
+    ; caused by the user having dragged the mouse: 
+    CoordMode, Mouse
+    MouseGetPos, EWD_MouseX, EWD_MouseY
+    WinGetPos, EWD_WinX, EWD_WinY,,, ahk_id %EWD_MouseWin%
+    SetWinDelay, -1 ; Makes the below move faster/smoother.
+    WinMove, ahk_id %EWD_MouseWin%,, EWD_WinX + EWD_MouseX - EWD_MouseStartX, EWD_WinY + EWD_MouseY - EWD_MouseStartY
+    EWD_MouseStartX := EWD_MouseX ; Update for the next timer-call to this subroutine.
+    EWD_MouseStartY := EWD_MouseY
 return
 
-startDropFocus:
-    Run, %A_ScriptDir%\dropFocus.ahk, %A_ScriptDir%, Min
-Return
 startOpacityHelper:
     Run, %A_ScriptDir%\automations\opacityDebugHelper.ahk, %A_ScriptDir%, Min
 Return
-startSlide:
-    Run, %A_ScriptDir%\inProgress\Slide.ahk, %A_ScriptDir%\inProgress\, Min
+startWRMB:
+    Run, %A_ScriptDir%\gaming\w_rmb_swap.ahk, %A_ScriptDir%\gaming\, Min
+Return
+startGameMode:
+    Run, %A_ScriptDir%\gaming\gameMode.ahk, %A_ScriptDir%\gaming\, Min
 Return
 
 StartSpt:
