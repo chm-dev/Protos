@@ -470,6 +470,10 @@ Return
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+SC056::
+Send !{SC056}
+Return
+
 CapsLock & BackSpace::
 LWin & BackSpace:: 
     Suspend, Permit
