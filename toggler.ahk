@@ -34,12 +34,12 @@ ScrollLock::Gui, toggles:Show, w%w% h%h% x0 y0
     }
 Return
 */
-#Include %A_ScriptDir%\Lib\TapHoldManager.ahk
-
+;#Include %A_ScriptDir%\Lib\TapHoldManager.ahk
 ;SetCapsLockState, AlwaysOff
+Menu, Tray, Icon, %A_ScriptDir%\Assets\toggler.ico, 1
 default_modifier = XButton1
 set_modifier = XButton2
-remove_modifier = LCtrl 
+remove_modifier = LShift
 
 allowedKeys = ``,1,2,3,4,5,6,7,8,9,0,F1,F2,F3,F4,F5
 allowedKeysArr := StrSplit(allowedKeys,",") 
@@ -50,8 +50,8 @@ area :=, old_area :=
 w := A_ScreenWidth, h := 30
 x := 0,y := 0
 
-thm2 := new TapHoldManager(,,,"~")
-thm2.Add(default_modifier " & Space", Func("ShowCurrentToggles"))
+;thm2 := new TapHoldManager(,,,"~")
+;thm2.Add(default_modifier " & Space", Func("ShowCurrentToggles"))
 
 createWindow(h)
 
@@ -71,11 +71,11 @@ ButtonRegister(modifier, hkey) {
     fn := Func("HotkeyShouldFire").Bind(modifier)
     Hotkey If, % fn
         Hotkey % hkey, FireHotkey
-    
+
 }
 
 HotkeyShouldFire(modifier, thisHotkey) {
-return GetKeyState(modifier, "P")
+    return GetKeyState(modifier, "P")
 }
 
 FireHotkey() {
@@ -90,11 +90,11 @@ FireHotkey() {
         WinGet, currentProcessFile, ProcessPath, ahk_id %WinUMID%
         hkey_noModifiers := Trim(StrSplit(A_ThisHotkey, "&")[StrSplit(A_ThisHotkey, "&").Length()])
         OutputDebug, % hkey_noModifiers
-        
+
         ObjRawSet(windows, hkey_noModifiers, {"winUMID": WinUMID, "processFile": currentProcessFile, "processFilename": currentProcessName, "hotkey": hkey_noModifiers})
-        
+
         TrayTip,WOOF! , % hkey_noModifiers . ": for " . currentProcessName . " window."
-            createWindow(h, true)
+        createWindow(h, true)
         ;OutputDebug %default_modifier% - %hkey_noModifiers% registered
         WinActivate, ahk_id %WinUMID%
         sleep 1000
@@ -106,7 +106,7 @@ FireHotkey() {
             WinUMID := windows[A_ThisHotkey]["WinUMID"]
             if (ID := WinExist("ahk_id " . WinUMID)){
                 WinGet, state, MinMax, ahk_id %WinUMID%
-                
+
                 if (state = -1) {
                     WinRestore ahk_id %WinUMID%
                     WinActivate
@@ -125,14 +125,14 @@ FireHotkey() {
         } Else {
             TrayTip,WOOF!, No WinUMID
         }
-        
+
     }
-    
+
 }
 
 createWindow(h, show:=False) {
     global w 
-    
+
     Gui, toggles:New
     Gui, toggles:Color, 242424
     ;Gui, toggles:Margin, 2, 8
@@ -155,14 +155,14 @@ createWindow(h, show:=False) {
             MsgBox, % "Err: A_Index - " . A_Index . ", IconNum - " . IconId 
         }
         LV_Add("Icon" . A_Index,v["hotKey"] . ": " . v["processFileName"])
-        
+
     }
     OutputDebug, Built window
     if (show){ 
         Gui, toggles:Show, w%w% h%h% x0 y0 
         OutputDebug, and shown it. 
     }
-    
+
 }
 
 for k, v in allowedKeysArr{
@@ -174,7 +174,7 @@ for k, v in allowedKeysArr{
 ShowCurrentToggles(isHold, taps, state){
     global w
     global h 
-    
+
     OutputDebug, %isHold%, %taps%, %state%
     if (isHold AND state){
         WinGet, currentActive, ID, A
@@ -192,6 +192,6 @@ ShowCurrentToggles(isHold, taps, state){
         KeyWait, %default_modifier%
         Return
     }
-    
+
 }
 

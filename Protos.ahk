@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Persistent 
 #InstallKeybdHook
 #InstallMouseHook
@@ -19,7 +19,7 @@ BlockInput, Send
 CoordMode, Mouse
 Menu, Tray, NoStandard
 Menu, Tray, Icon, %A_ScriptDir%\protos.png, 1
-Menu, Tray, Add,Start &OpacityHelper, startOpacityHelper
+Menu, Tray, Add,Start &Toggler, startToggler
 Menu, Tray, Add,Start W_RMB &Swapper, startWRMB
 Menu, Tray, Add,Start &GameMode, startGameMode
 
@@ -56,7 +56,7 @@ GroupAdd, SpotifyGrp, ahk_exe %playerExe%,,,(?:^.?$)|(?:^devtools) ;global windo
 if (InStr(A_ComputerName, workHostname, false))
     global browserExe="C:\vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
 else
-    global browserExe="C:\Users\chm\AppData\Local\Vivaldi\Application\vivaldi.exe --window-size=480x480 --app="
+    global browserExe="vivaldi.exe --window-size=480x480 --app="
 
 global browserWebmaker = "chrome-extension://lkfkkhfhhdkiemehlpkgjeojomhpccnh/index.html" 
 global browserTranslate= "chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/pages/public/window.html"
@@ -471,7 +471,7 @@ Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
 SC056::
-Send !{SC056}
+    Send !{SC056}
 Return
 
 CapsLock & BackSpace::
@@ -626,8 +626,8 @@ EWD_WatchMouse:
     EWD_MouseStartY := EWD_MouseY
 return
 
-startOpacityHelper:
-    Run, %A_ScriptDir%\automations\opacityDebugHelper.ahk, %A_ScriptDir%, Min
+startToggler:
+    Run, %A_ScriptDir%\toggler.ahk, %A_ScriptDir%, Min
 Return
 startWRMB:
     Run, %A_ScriptDir%\gaming\w_rmb_swap.ahk, %A_ScriptDir%\gaming\, Min
