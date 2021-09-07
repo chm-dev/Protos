@@ -1,0 +1,1 @@
+Quick_Any2Ico.exe -res=Quick_Any2Ico.exe "-icon=res.ico icon/png"

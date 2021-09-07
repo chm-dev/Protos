@@ -142,6 +142,7 @@ createWindow(h, show:=False) {
     Gui, toggles:Add, ListView, x4 y5 w%w% h%h% +IconSmall +ReadOnly +0x2000 -E0x200 -0x40000 -0xC00000 +Background0x242424
     Gui toggles:+LastFound
     WinSet, Transparent, 230
+    WinSet, ExStyle, +0x08000028
     ; Create ImageList for columns icons
     ImageListID := IL_Create(windows.Count())
     LV_SetImageList(ImageListID)

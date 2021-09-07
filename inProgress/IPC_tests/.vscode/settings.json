@@ -1,0 +1,18 @@
+{
+    "javascript-repl.gutters": {
+        "covered": "#2ecc40",
+        "uncovered": "#dddddd",
+        "error": "#ff4136",
+        "partially": "#ffb90f"
+    },
+    "grunt.autoDetect": "off",
+    "auto-run-command.rules": [
+
+        {
+            "condition": "hasFile: package.json",
+            "command": "achil.repl.runCurrent",
+            "message": "Running JS REPL"
+        }
+    ],
+
+}
