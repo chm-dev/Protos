@@ -1,3 +1,6 @@
+#SingleInstance, Force
+SendMode Input
+SetWorkingDir, %A_ScriptDir%
 
 /*
 CapsLock::
@@ -40,6 +43,8 @@ Menu, Tray, Icon, %A_ScriptDir%\Assets\toggler.ico, 1
 default_modifier = XButton1
 set_modifier = XButton2
 remove_modifier = LShift
+
+XButton1 & r::Reload
 
 allowedKeys = ``,1,2,3,4,5,6,7,8,9,0,F1,F2,F3,F4,F5
 allowedKeysArr := StrSplit(allowedKeys,",") 

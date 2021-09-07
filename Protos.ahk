@@ -100,8 +100,8 @@ if (InStr(A_ComputerName, workHostname, false))
 
 openLauncher(isHold, taps, state){
     global launcherMode
-    if (taps = 2 and GetKeyState("ScrollLock", "T")=0 and launcherMode=0)
-        Send {LAlt Down}{BackSpace}{LAlt Up}
+    ;  if (taps = 2 and GetKeyState("ScrollLock", "T")=0 and launcherMode=0)    
+    Send !{SC056}
 Return
 }
 
@@ -361,8 +361,7 @@ Return
     Send {Blind}{LShift}
     KeyWait, LWin 
     If (InStr(A_PriorKey,"LWin"))
-        Send {LAlt Down}{BackSpace}{LAlt Up}
-
+        Send !{SC056}
 Return 
 #If
 
