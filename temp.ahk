@@ -1,12 +1,14 @@
 
+#Include, %A_ScriptDir%\automations\bp.ahk
+
 #If WinActive("ahk_exe mstsc.exe") 
     
 !+Enter::Send Alexmann23
 
 !+Backspace:: 
     
-    RDPWorkArea(40)
-    Gosub taskbarFix
+    RDPWorkArea(40, 40)
+ ;   Gosub taskbarFix
     
     WinGet, transcolor, TransColor, ahk_class TscShellContainerClass
     If (!transcolor)
@@ -15,15 +17,15 @@
         WinSet TransColor, Off, ahk_class TscShellContainerClass
 Return
 !+=::
-    Gosub taskbarFix
-    RDPWorkArea(40)
+  ;  Gosub taskbarFix
+    RDPWorkArea(40, 40)
 Return
 #If
     
 
 !+=::
 !+Backspace:: 
-    RDPWorkArea(0)
+    RDPWorkArea()
 Return
 
 ;730073, 
@@ -39,8 +41,8 @@ Send {Alt Down}{Home Down}{Shift Down}{Right}{Shift Up}{Home Up}{Alt Up}
 Return
 !Tab::!PgUp
 !+Tab::!PgDn
-LWin::!Home
-^LWin::Lwin
+; LWin::!Home  
+; ^LWin::Lwin
 +Esc::!Home
 !Space::!Delete
 
@@ -75,16 +77,16 @@ SetWorkArea(left,top,right,bottom)  ; set main monitor work area ; windows are n
     DllCall("SystemParametersInfo", "UInt", 0x2F, "UInt", 0, "UPtr", &area, "UInt", 0) ; SPI_SETWORKAREA
 }
 
-RDPWorkArea(limit:=0)
+RDPWorkArea(limittop:=0, limitbottom:=0)
 {  
     vw:=A_ScreenWidth 
     ;SysGet, vw, 78
     vh:=A_ScreenHeight
     ;SysGet, vh, 79
-    nh:=vh-limit
+    nh:=vh-limittop-limitbottom
     nw:=vw
     x:=0
-    y:=limit
+    y:=limittop
     ;second display - hardcoded ugly af but i cant be bothered
     nw2:=vw*2
     nh2:=nh

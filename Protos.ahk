@@ -1,4 +1,4 @@
-﻿#SingleInstance Force
+#SingleInstance Force
 #Persistent 
 #InstallKeybdHook
 #InstallMouseHook
@@ -7,7 +7,7 @@
 SoundPlay, %A_ScriptDir%\sounds\protos_active.mp3
 Sleep 1500
 
-DetectHiddenWindows, On
+DetectHiddenWindows, On 
 SetTitleMatchMode, RegEx
 SendMode, Event
 SetWorkingDir %A_ScriptDir%
@@ -470,6 +470,10 @@ Return
 Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+SC056::
+Send !{SC056}
+Return
+
 CapsLock & BackSpace::
 LWin & BackSpace:: 
     Suspend, Permit
