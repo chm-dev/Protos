@@ -267,8 +267,8 @@ CapsLock & XButton2::
 
 Return
 
-LCtrl & XButton1::Send ^!{Left}
-LCtrl & XButton2::Send ^!{Right}
+LCtrl & XButton1::Send ^#{Left}
+LCtrl & XButton2::Send ^#{Right}
 
 ^!v::
     SendEvent {Raw}%Clipboard%
@@ -297,10 +297,28 @@ XButton1 & MButton::
 ^!MButton:: 
     Send {Volume_Mute}
 Return
-XButton1:: Return
-XButton2:: Return
-^XButton1:: Send {XButton1}
-^XButton2:: Send {XButton2}
+
+XButton1:: 
++XButton1:: 
+    if (!GetKeyState("Shift")){
+        MouseGetPos,,, WinUMID
+        WinActivate, ahk_id %WinUMID%
+    }
+    SendEvent #{Left}
+Return
+XButton2::
++XButton2:: 
+    if (!GetKeyState("Shift")){
+        MouseGetPos,,, WinUMID
+        WinActivate, ahk_id %WinUMID%
+    }
+    SendEvent #{Right}
+Return
+
+^XButton1:: SendEvent #+{Left}
+
+^XButton2::SendEvent #+{Right}
+Return
 !XButton1::
 !+XButton1::
     if (!GetKeyState("Shift"))
@@ -467,8 +485,20 @@ Return
 ::@al:: 
     SendInput tomasz.chmielewski@alexmann.com 
 Return
+::@we:: 
+    SendInput tomasz.chmielewski@weareams.com 
+Return
+::@num:: 
+    SendInput 579948647
+Return
 
 ;---------- EXPERIMENTS BELOW ---------------------------
+
+CapsLock & Space:: 
+WinGetTitle, path, ahk_exe dopus.exe
+Send %path%
+Return
+
 SC056::
     Send !{SC056}
 Return
@@ -479,10 +509,12 @@ LWin & BackSpace::
     if (A_IsSuspended){
         Run, explorer.exe
         Suspend, Off
+        SetCapsLockState, AlwaysOff
         SoundPlay %A_ScriptDir%\sounds\game_mode_off.mp3
     }
     Else{
         Run, taskkill /IM explorer.exe /F
+        SetCapsLockState, Off
         Suspend, On
         SoundPlay %A_ScriptDir%\sounds\game_mode_on.mp3
     }
@@ -507,7 +539,7 @@ return
 
 ; Note: You can optionally release the ALT key after pressing down the mouse button
 ; rather than holding it down the whole time.
-CapsLock & j::Run, %browserExe%%browserJoin%
+
 CapsLock & y::Run, %browserExe%%browserTranslate%
 CapsLock & t::
     releaseAllModifiers()
