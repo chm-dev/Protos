@@ -495,8 +495,8 @@ Return
 ;---------- EXPERIMENTS BELOW ---------------------------
 
 CapsLock & Space:: 
-WinGetTitle, path, ahk_exe dopus.exe
-Send %path%
+WinGetTitle, dopath, ahk_exe dopus.exe
+Send %dopath%
 Return
 
 SC056::
@@ -611,7 +611,7 @@ Return
     ~Esc:: WinClose, A
 #If
 
-~Alt & LButton:: 
+~RAlt & LButton:: 
     CoordMode, Mouse ; Switch to screen/absolute coordinates.
     MouseGetPos, EWD_MouseStartX, EWD_MouseStartY, EWD_MouseWin
     WinGetPos, EWD_OriginalPosX, EWD_OriginalPosY,,, ahk_id %EWD_MouseWin%
